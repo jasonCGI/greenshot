@@ -11,6 +11,7 @@ Review scope: export profile model/storage, Output settings bindings and handler
 - XML entity resolution could otherwise read external resources. Deserialization prohibits DTDs, disables the resolver, and limits document size.
 - A blank name field was visually unclear. It now has a visible label and accessible name. The first built-in profile is selected for discovery, but settings change only when Apply is pressed.
 - Preview packaging could otherwise include user settings/logs or stale libraries. Packaging includes only runtime assets and explicit documentation, compares Base/Editor DLL hashes against the test host, requires committed source, and creates a file manifest. The launcher uses separate settings/log directories.
+- A build made before the source commit retained the earlier commit in binary version metadata. Packaging now checks the compiled product versions of the executable and Base/Editor DLLs against the source commit and rejects stale stamps. Release binaries are rebuilt after committing source.
 
 ## Verification
 

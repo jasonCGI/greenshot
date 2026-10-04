@@ -21,6 +21,14 @@ commit = subprocess.check_output(['git', '-C', str(repo), 'rev-parse', 'HEAD'], 
 if subprocess.check_output(['git', '-C', str(repo), 'status', '--porcelain'], text=True).strip():
     raise RuntimeError('Commit and review the source before packaging.')
 build = repo / 'src/Greenshot/bin/Debug-Light/net480'
+versions = {}
+for name in ['Greenshot.exe', 'Greenshot.Base.dll', 'Greenshot.Editor.dll']:
+    quoted_path = str(build / name).replace("'", "''")
+    version = subprocess.check_output(['powershell.exe', '-NoProfile', '-Command',
+        "[Diagnostics.FileVersionInfo]::GetVersionInfo('" + quoted_path + "').ProductVersion"], text=True).strip()
+    if commit[:10] not in version:
+        raise RuntimeError('Rebuild committed source before packaging: stale version stamp in ' + name)
+    versions[name] = version
 stage = output / args.tag
 stage.mkdir(parents=True, exist_ok=False)
 app = stage / 'app'
@@ -91,6 +99,7 @@ with urllib.request.urlopen('https://raw.githubusercontent.com/mozilla/twemoji-c
 notices += ['## Twemoji Mozilla', 'Unmodified font copied from the Greenshot source tree.', 'Mozilla Foundation and Twemoji contributors. Font construction: Apache-2.0; emoji artwork: CC-BY-4.0.', 'https://github.com/mozilla/twemoji-colr', 'See licenses/Twemoji-Mozilla-LICENSE.md.', '']
 (stage / 'THIRD-PARTY-NOTICES.md').write_text('\n'.join(notices), encoding='utf-8')
 manifest = {'tag': args.tag, 'sourceCommit': commit, 'sourceUrl': 'https://github.com/jasonCGI/greenshot/tree/' + commit,
+            'binaryProductVersions': versions,
             'buildConfiguration': 'DebugLight', 'targetFramework': 'net480', 'nativeAcceptance': 'pending',
             'files': {p.relative_to(stage).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(stage.rglob('*')) if p.is_file()}}
 (stage / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
