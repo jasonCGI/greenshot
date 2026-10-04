@@ -10,6 +10,18 @@ Open **Preferences > General > UI size**. Choose 100%, 125%, 150%, or 200%. Use 
 
 The hotkey labels distinguish monitor captures from application-window captures. On multiple displays the tray menu offers all monitors, the monitor at the pointer, or a listed monitor.
 
+## Output format and export profiles
+
+Open **Preferences > Output**. Select WebP in **Image format (PNG, JPEG, WebP...)**; the compression controls are further down in Quality settings. Save As can choose a format for one file.
+
+Choose Web PNG, Print JPEG, or Lossless WebP in **Export profiles**, then press **Apply**. Merely selecting a profile does not apply it. Web PNG uses 72 DPI metadata; Print JPEG uses 300 DPI metadata and quality 90; Lossless WebP uses exact compression. Profiles do not resize pixels.
+
+Enter a unique **New profile name** and press **Save current as** to retain the current export preferences. Up to 20 custom profiles are supported. **Delete custom** removes a saved custom profile without changing the current export settings. Profiles do not store paths, overwrite policy, or filename patterns. Preferences uses live bindings, so Cancel is not a full rollback of valid edits.
+
+![Output settings showing profiles, image format discovery, and DPI controls](whitepaper/images/output-export-profiles.png)
+
+This example selects Web PNG without pressing Apply, so the active DPI remains Preserve. Quality controls continue below the scroll position.
+
 ## Export resolution and summary
 
 Enable the quality prompt under **Preferences > Output**. When saving PNG or JPEG, choose Preserve, Web 72, Print 300, or Custom DPI. The summary shows pixels, selected resolution, nominal print dimensions, and compression. Resolution metadata alone does not resize pixels.

@@ -38,6 +38,10 @@ namespace Greenshot.Base.Core
     [Description("Greenshot core configuration")]
     public interface ICoreConfiguration : IIniSection, INotifyPropertyChanged, IAfterLoad, IBeforeSave
     {
+        [Description("Named export profiles, encoded XML. Managed in Output settings.")]
+        [DefaultValue("")]
+        string OutputExportProfiles { get; set; }
+
         [Description("Application UI size in percent, independent of image zoom and export DPI (100, 125, 150, 200).")]
         [DefaultValue(100)]
         int UiScalePercent { get; set; }

@@ -668,6 +668,24 @@
             <TabItem Header="{wpf:Text Settings.Output}">
                 <ScrollViewer Style="{DynamicResource ThemedScrollViewer}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                     <StackPanel>
+                        <GroupBox Header="Export profiles">
+                            <StackPanel>
+                                <TextBlock Text="Choose a profile and Apply, or save the current export settings under a new name. Profiles change format, compression, and DPI, while keeping pixel dimensions." TextWrapping="Wrap" Margin="6,0,6,8"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <ComboBox x:Name="ExportProfileInput" ItemsSource="{Binding ExportProfiles}" DisplayMemberPath="Name" SelectedItem="{Binding SelectedExportProfile, Mode=TwoWay}" AutomationProperties.Name="Export profile"/>
+                                    <Button Grid.Column="1" Content="Apply" Click="ApplyExportProfile_Click"/>
+                                    <Button Grid.Column="2" Content="Delete custom" Click="DeleteExportProfile_Click"/>
+                                </Grid>
+                                <Label Content="New profile name" Target="{Binding ElementName=ExportProfileNameInput}" Margin="6,2,0,0" Padding="0"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <TextBox x:Name="ExportProfileNameInput" Text="{Binding ExportProfileName, UpdateSourceTrigger=PropertyChanged}" MaxLength="64" AutomationProperties.Name="New profile name" ToolTip="Enter a new profile name"/>
+                                    <Button Grid.Column="1" Content="Save current as" Click="SaveExportProfile_Click"/>
+                                </Grid>
+                                <TextBlock Text="{Binding ExportProfileStatus}" TextWrapping="Wrap" Margin="6,4" AutomationProperties.LiveSetting="Polite"/>
+                            </StackPanel>
+                        </GroupBox>
                         <GroupBox Header="{wpf:Text Settings.Preferredfilesettings}">
                             <StackPanel>
                                 <Grid Margin="0,5">
@@ -694,7 +712,7 @@
                                     <Button Grid.Row="1" Grid.Column="2" Content="?" Style="{StaticResource IconButtonStyle}" Margin="6,0,0,0" Click="ShowPatternHelp_Click"
                                              IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=OutputFileFilenamePattern}"/>
                                     
-                                    <Label Grid.Row="2" Grid.Column="0" Content="{wpf:Text Settings.Primaryimageformat}" Margin="0,0,12,0"/>
+                                    <Label Grid.Row="2" Grid.Column="0" Content="Image format (PNG, JPEG, WebP...)" Margin="0,0,12,0"/>
                                     <ComboBox Grid.Row="2" Grid.Column="1"
                                               ItemsSource="{Binding ImageFormats}"
                                               DisplayMemberPath="DisplayNameWithPreferredExtension"
@@ -702,6 +720,7 @@
                                               SelectedValue="{Binding CoreConfiguration.OutputFileFormat, Mode=TwoWay}"
                                               IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=OutputFileFormat}"/>
                                 </Grid>
+                                <TextBlock Text="For WebP, choose WebP (.webp) in Image format. Its compression controls appear below. Save As also lets you choose a format for one export." TextWrapping="Wrap" Margin="6,0,6,8"/>
                                 <Grid Margin="0,5" IsEnabled="{Binding CoreConfiguration.OutputFileFormat, Converter={StaticResource ExportDpiFormatConverter}}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>

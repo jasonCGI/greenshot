@@ -115,6 +115,10 @@ namespace Greenshot.Forms.Wpf
             }
         }
 
+        private void ApplyExportProfile_Click(object sender, RoutedEventArgs e) => _viewModel.ApplyExportProfile();
+        private void SaveExportProfile_Click(object sender, RoutedEventArgs e) => _viewModel.SaveExportProfile();
+        private void DeleteExportProfile_Click(object sender, RoutedEventArgs e) => _viewModel.DeleteExportProfile();
+
         public void SelectTab(string tabName)
         {
             if (string.IsNullOrWhiteSpace(tabName)) return;

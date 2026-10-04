@@ -76,6 +76,7 @@ namespace Greenshot.Forms.Wpf
             
             // Initialize image formats
             InitializeImageFormats();
+            InitializeExportProfiles();
             
             // Initialize window capture modes
             InitializeWindowCaptureModes();

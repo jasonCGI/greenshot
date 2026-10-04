@@ -4,6 +4,8 @@ This is an unofficial development fork of [Greenshot](https://github.com/greensh
 
 ## Features
 
+- Export profiles: explicit Apply for Web PNG, Print JPEG, and Lossless WebP; up to 20 custom profiles stored with export preferences.
+
 - PNG/JPEG resolution: Preserve, Web 72, Print 300, or Custom 1 to 2400 DPI. Presets change metadata without resizing pixels. Quick Preferences and the quality dialog share the setting.
 - Still-image WebP: explicit Lossy/Lossless mode and separate quality 0 to 100. Lossless preserves rendered RGBA; WebP does not apply the PNG/JPEG DPI presets.
 - Resize: exact unlocked pixels, consistently rounded aspect bounds, percentages, and inches/cm with explicit DPI resampling. Enlarging requires acknowledgment and adds no detail.
@@ -21,10 +23,10 @@ Run `docs/cardona-export/scripts/Build-Preview.ps1 -Test` from a PowerShell term
 
 `-NoRestore` requires a prior build with cached packages, the unchanged build helper, and plugin builds. The normal restore graph was previously blocked by a package-feed failure in the development environment; it has not been independently retested.
 
-Latest local evidence, October 4, 2026: 558 focused tests passed, zero failures, errors, timeouts, or aborts. This is not the full upstream suite. Ten copied-library PNG/JPEG comparisons additionally verified density tags, unchanged source, and equal PNG pixels. Existing upstream analyzer warnings remain. Test logs contain local environment details and are not published here.
+Latest local evidence, October 4, 2026: 578 focused tests passed, zero failures, errors, timeouts, or aborts. This is not the full upstream suite. Ten copied-library PNG/JPEG comparisons additionally verified density tags, unchanged source, and equal PNG pixels. Existing upstream analyzer warnings remain. Test logs contain local environment details and are not published here.
 
 Native mouse/keyboard, Save As, overwrite, mixed-monitor, and Photoshop placement acceptance remains pending. The illustrated controls are real WPF controls rendered offscreen, not native desktop captures. Native OS dialogs and plugin-specific legacy dialog scaling are outside the new UI-scale guarantee.
 
 Keep Preserve and UI size 100 as current defaults. Main Preferences retains upstream live bindings; Cancel is not a full rollback of valid in-memory edits. Do not run this preview beside installed Greenshot: the single-instance lock is shared. Save your work and normally exit the installed copy first.
 
-Application source is on `codex/export-dpi-presets`. No upstream pull request, binary release, or installer is implied by this fork.
+Application source is on `codex/export-dpi-presets`. The GitHub prerelease packages the lightweight preview. No upstream pull request or installer is included. See PREVIEW-README.md, ACCEPTANCE-CHECKLIST.md, and CODE-REVIEW.md.
