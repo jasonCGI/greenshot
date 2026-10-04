@@ -4,7 +4,7 @@ Unofficial Windows development preview of Greenshot. This ZIP is a lightweight D
 
 ## Run with isolated settings
 
-1. Download the ZIP and SHA256SUMS.txt from the same GitHub release. Run `Get-FileHash .\cardona-export-preview-2026.10.04.1-windows-net48.zip -Algorithm SHA256` and compare with SHA256SUMS.txt.
+1. Download the ZIP and SHA256SUMS.txt from the same GitHub release. Run `Get-FileHash -LiteralPath '<downloaded ZIP filename>' -Algorithm SHA256`, replacing the placeholder with the actual filename, and compare with SHA256SUMS.txt.
 2. Extract the ZIP into a writable folder. Keep all app files together. Windows with .NET Framework 4.8 is required.
 3. Save open screenshots and normally Exit any running Greenshot, including an older preview. The single-instance lock is shared.
 4. Run `Start-Preview.ps1` in PowerShell without changing execution policy. If Windows blocks a downloaded file, review its source and signature status before unblocking. This preview is unsigned.
