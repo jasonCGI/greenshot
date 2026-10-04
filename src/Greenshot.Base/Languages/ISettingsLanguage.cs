@@ -31,6 +31,9 @@ namespace Greenshot.Base.Languages
     [IniLanguageSection("Settings")]
     public interface ISettingsLanguage : INotifyPropertyChanged
     {
+        string Uiscale { get; }
+        string UiscaleReset { get; }
+        string UiscaleDescription { get; }
         /// <summary>
         /// AI tools
         /// </summary>
@@ -305,6 +308,49 @@ namespace Greenshot.Base.Languages
         /// Show window thumbnails in context menu (for Vista and windows 7)
         /// </summary>
         string ExpertThumbnailpreview { get; }
+
+        /// <summary>
+        /// Export resolution
+        /// </summary>
+        string Exportdpi { get; }
+
+        /// <summary>
+        /// Custom DPI
+        /// </summary>
+        [DefaultValue("Custom DPI")]
+        string ExportdpiCustom { get; }
+
+        /// <summary>
+        /// Enter a whole-number DPI from 1 to 2400.
+        /// </summary>
+        [DefaultValue("Enter a whole-number DPI from 1 to 2400.")]
+        string ExportdpiCustomInvalid { get; }
+
+        /// <summary>
+        /// Custom DPI (1 to 2400)
+        /// </summary>
+        [DefaultValue("Custom DPI (1 to 2400)")]
+        string ExportdpiCustomValue { get; }
+
+        /// <summary>
+        /// Changes PNG/JPEG DPI metadata only. Pixel dimensions stay the same. Web display uses pixel dimensions.
+        /// </summary>
+        string ExportdpiDescription { get; }
+
+        /// <summary>
+        /// Preserve original DPI
+        /// </summary>
+        string ExportdpiPreserve { get; }
+
+        /// <summary>
+        /// Print (300 DPI)
+        /// </summary>
+        string ExportdpiPrint { get; }
+
+        /// <summary>
+        /// Web (72 DPI)
+        /// </summary>
+        string ExportdpiWeb { get; }
 
         /// <summary>
         /// Filename pattern
@@ -616,6 +662,36 @@ namespace Greenshot.Base.Languages
         /// Milliseconds to wait before capture
         /// </summary>
         string Waittime { get; }
+
+        /// <summary>
+        /// Both modes are compressed. Lossless preserves image pixels; lossy uses quality to reduce file size.
+        /// </summary>
+        [DefaultValue("Both modes are compressed. Lossless preserves image pixels; lossy uses quality to reduce file size.")]
+        string WebpDescription { get; }
+
+        /// <summary>
+        /// Lossless (exact pixels)
+        /// </summary>
+        [DefaultValue("Lossless (exact pixels)")]
+        string WebpLossless { get; }
+
+        /// <summary>
+        /// Lossy (smaller files)
+        /// </summary>
+        [DefaultValue("Lossy (smaller files)")]
+        string WebpLossy { get; }
+
+        /// <summary>
+        /// WebP compression
+        /// </summary>
+        [DefaultValue("WebP compression")]
+        string WebpMode { get; }
+
+        /// <summary>
+        /// WebP quality (0 to 100)
+        /// </summary>
+        [DefaultValue("WebP quality (0 to 100)")]
+        string WebpQuality { get; }
 
         /// <summary>
         /// Window capture mode

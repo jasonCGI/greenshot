@@ -1,7 +1,9 @@
 <Window x:Class="Greenshot.Forms.Wpf.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:wpf="clr-namespace:Greenshot.Base.Wpf;assembly=Greenshot.Base"
+        xmlns:coreEnums="clr-namespace:Greenshot.Base.Core.Enums;assembly=Greenshot.Base"
         Title="{wpf:Text Settings.Title}"
         Icon="{Binding WindowIcon}"
         Width="820" Height="820"
@@ -25,6 +27,8 @@
         <wpf:ExpertVisibilityConverter x:Key="ExpertVisibilityConverter"/>
         <wpf:FixedToEnabledConverter x:Key="FixedToEnabledConverter"/>
         <wpf:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+        <wpf:ExportDpiFormatConverter x:Key="ExportDpiFormatConverter"/>
+        <wpf:WebpFormatConverter x:Key="WebpFormatConverter"/>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         
         <!-- Modern GroupBox Style -->
@@ -486,6 +490,26 @@
                                 
                                 <CheckBox Content="{wpf:Text Settings.Autostartshortcut}"
                                           IsChecked="{Binding AutoStartEnabled, Mode=TwoWay}"/>
+                                <Grid Margin="0,8,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="{wpf:Text Settings.Uiscale}" Target="{Binding ElementName=UiScaleComboBox}"/>
+                                    <ComboBox x:Name="UiScaleComboBox" Grid.Column="1"
+                                              ItemsSource="{Binding UiScaleChoices}"
+                                              SelectedItem="{Binding UiScalePercent, Mode=TwoWay}"
+                                              IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=UiScalePercent}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate><TextBlock Text="{Binding StringFormat={}{0}%}"/></DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                    <Button x:Name="UiScaleResetButton" Grid.Column="2" Margin="8,0,0,0"
+                                            Content="{wpf:Text Settings.UiscaleReset}" Click="UiScaleReset_Click"
+                                            IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=UiScalePercent}"/>
+                                </Grid>
+                                <TextBlock Text="{wpf:Text Settings.UiscaleDescription}" TextWrapping="Wrap" Margin="0,6,0,0"/>
                             </StackPanel>
                         </GroupBox>
                         
@@ -678,6 +702,74 @@
                                               SelectedValue="{Binding CoreConfiguration.OutputFileFormat, Mode=TwoWay}"
                                               IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=OutputFileFormat}"/>
                                 </Grid>
+                                <Grid Margin="0,5" IsEnabled="{Binding CoreConfiguration.OutputFileFormat, Converter={StaticResource ExportDpiFormatConverter}}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Label Content="{wpf:Text Settings.Exportdpi}" Target="{Binding ElementName=ExportDpiPresetInput}" Margin="0,0,12,0"/>
+                                    <ComboBox Grid.Column="1"
+                                              x:Name="ExportDpiPresetInput"
+                                              SelectedValuePath="Tag"
+                                              SelectedValue="{Binding CoreConfiguration.OutputFileDpiPreset, Mode=TwoWay}"
+                                              IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=OutputFileDpiPreset}">
+                                        <ComboBoxItem Content="{wpf:Text Settings.ExportdpiPreserve}" Tag="{x:Static coreEnums:ExportDpiPreset.Preserve}"/>
+                                        <ComboBoxItem Content="{wpf:Text Settings.ExportdpiWeb}" Tag="{x:Static coreEnums:ExportDpiPreset.Web}"/>
+                                        <ComboBoxItem Content="{wpf:Text Settings.ExportdpiPrint}" Tag="{x:Static coreEnums:ExportDpiPreset.Print}"/>
+                                        <ComboBoxItem Content="{wpf:Text Settings.ExportdpiCustom}" Tag="{x:Static coreEnums:ExportDpiPreset.Custom}"/>
+                                    </ComboBox>
+                                    <Label Grid.Row="1" Content="{wpf:Text Settings.ExportdpiCustomValue}" Target="{Binding ElementName=CustomDpiInput}" Margin="0,0,12,0"/>
+                                    <TextBox Grid.Row="1" Grid.Column="1" x:Name="CustomDpiInput"
+                                             MinWidth="100" HorizontalAlignment="Left"
+                                             IsEnabledChanged="CustomDpiInput_IsEnabledChanged">
+                                        <TextBox.Style>
+                                            <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                                                <Setter Property="IsEnabled" Value="False"/>
+                                                <Setter Property="Text" Value="{Binding CoreConfiguration.OutputFileCustomDpi, Mode=OneWay}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding CoreConfiguration.OutputFileDpiPreset}" Value="{x:Static coreEnums:ExportDpiPreset.Custom}">
+                                                        <Setter Property="IsEnabled" Value="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=OutputFileCustomDpi}"/>
+                                                    </DataTrigger>
+                                                    <Trigger Property="IsEnabled" Value="True">
+                                                        <Setter Property="Text">
+                                                            <Setter.Value>
+                                                                <Binding Path="CoreConfiguration.OutputFileCustomDpi" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
+                                                                    <Binding.ValidationRules>
+                                                                        <wpf:ExportDpiValidationRule ValidatesOnTargetUpdated="True"/>
+                                                                    </Binding.ValidationRules>
+                                                                </Binding>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBox.Style>
+                                    </TextBox>
+                                    <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="{wpf:Text Settings.ExportdpiCustomInvalid}"
+                                               TextWrapping="Wrap" Margin="6,0,6,4"
+                                               Foreground="{Binding Source={x:Static wpf:ThemeManager.Instance}, Path=ErrorBrush}">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding ElementName=CustomDpiInput, Path=IsEnabled}" Value="True"/>
+                                                            <Condition Binding="{Binding ElementName=CustomDpiInput, Path=(Validation.HasError)}" Value="True"/>
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </MultiDataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
+                                <TextBlock Text="{wpf:Text Settings.ExportdpiDescription}" TextWrapping="Wrap" Margin="0,0,0,8"/>
                                 
                                 <CheckBox Content="{wpf:Text Settings.Copypathtoclipboard}"
                                           IsChecked="{Binding CoreConfiguration.OutputFileCopyPathToClipboard, Mode=TwoWay}"
@@ -709,12 +801,67 @@
                                              IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=OutputFileJpegQuality}"/>
                                 </Grid>
                                 
+                                <StackPanel Margin="0,5" IsEnabled="{Binding CoreConfiguration.OutputFileFormat, Converter={StaticResource WebpFormatConverter}}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="150"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Content="{wpf:Text Settings.WebpMode}" Target="{Binding ElementName=WebpModeInput}"/>
+                                        <ComboBox Grid.Column="1" x:Name="WebpModeInput" SelectedValuePath="Tag"
+                                                  SelectedValue="{Binding CoreConfiguration.OutputFileWebpLossless, Mode=TwoWay}"
+                                                  IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=OutputFileWebpLossless}">
+                                            <ComboBoxItem Content="{wpf:Text Settings.WebpLossy}">
+                                                <ComboBoxItem.Tag><sys:Boolean>False</sys:Boolean></ComboBoxItem.Tag>
+                                            </ComboBoxItem>
+                                            <ComboBoxItem Content="{wpf:Text Settings.WebpLossless}">
+                                                <ComboBoxItem.Tag><sys:Boolean>True</sys:Boolean></ComboBoxItem.Tag>
+                                            </ComboBoxItem>
+                                        </ComboBox>
+                                    </Grid>
+                                    <Grid Margin="0,5" x:Name="WebpQualityRow">
+                                        <Grid.Style>
+                                            <Style TargetType="Grid">
+                                                <Setter Property="IsEnabled" Value="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=OutputFileWebpQuality}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding CoreConfiguration.OutputFileWebpLossless}" Value="True">
+                                                        <Setter Property="IsEnabled" Value="False"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Grid.Style>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="150"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="85"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Content="{wpf:Text Settings.WebpQuality}" Target="{Binding ElementName=WebpQualityInput}"/>
+                                        <Slider Grid.Column="1" x:Name="WebpQualityInput"
+                                                Minimum="0" Maximum="100" TickFrequency="1" IsSnapToTickEnabled="True"
+                                                SmallChange="1" LargeChange="10"
+                                                Value="{Binding CoreConfiguration.OutputFileWebpQuality, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBox Grid.Column="2" Text="{Binding CoreConfiguration.OutputFileWebpQuality, Mode=OneWay}"
+                                                 IsReadOnly="True" TextAlignment="Center" Padding="2,4" MinWidth="65"/>
+                                    </Grid>
+                                    <TextBlock Text="{wpf:Text Settings.WebpDescription}" TextWrapping="Wrap"/>
+                                </StackPanel>
+
                                 <CheckBox Content="{wpf:Text Settings.Alwaysshowqualitydialog}"
                                           IsChecked="{Binding CoreConfiguration.OutputFilePromptQuality, Mode=TwoWay}"
                                           IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=OutputFilePromptQuality}"/>
-                                <CheckBox Content="{wpf:Text Settings.Reducecolors}"
-                                          IsChecked="{Binding CoreConfiguration.OutputFileReduceColors, Mode=TwoWay}"
-                                          IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=OutputFileReduceColors}"/>
+                                <CheckBox x:Name="ReduceColorsInput" Content="{wpf:Text Settings.Reducecolors}"
+                                          IsChecked="{Binding CoreConfiguration.OutputFileReduceColors, Mode=TwoWay}">
+                                    <CheckBox.Style>
+                                        <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+                                            <Setter Property="IsEnabled" Value="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=OutputFileReduceColors}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding CoreConfiguration.OutputFileFormat, Converter={StaticResource WebpFormatConverter}}" Value="True">
+                                                    <Setter Property="IsEnabled" Value="False"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </CheckBox.Style>
+                                </CheckBox>
                             </StackPanel>
                         </GroupBox>
                     </StackPanel>
@@ -1145,11 +1292,25 @@
                     Orientation="Horizontal" 
                     HorizontalAlignment="Right" 
                     Margin="0,10,0,0">
-            <Button Content="{wpf:Text Core.Ok}" 
+            <Button x:Name="SettingsOkButton" Content="{wpf:Text Core.Ok}"
                     MinWidth="80" 
                     Margin="5,0"
                     IsDefault="True"
-                    Click="OkButton_Click"/>
+                    Click="OkButton_Click">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding ElementName=CustomDpiInput, Path=IsEnabled}" Value="True"/>
+                                    <Condition Binding="{Binding ElementName=CustomDpiInput, Path=(Validation.HasError)}" Value="True"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
             <Button Content="{wpf:Text Core.Cancel}" 
                     MinWidth="80"
                     Margin="5,0"

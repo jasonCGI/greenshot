@@ -34,6 +34,7 @@ using Greenshot.Plugin.Office;
 
 namespace Greenshot.Tests.Forms
 {
+    [Collection(TestCollections.WpfThemeState)]
     public class SettingsWindowTests
     {
         private readonly ITestOutputHelper _output;

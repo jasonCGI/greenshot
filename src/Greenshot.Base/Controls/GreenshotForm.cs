@@ -39,6 +39,7 @@ namespace Greenshot.Base.Controls
     /// </summary>
     public class GreenshotForm : Form
     {
+        protected UiChromeScale UiChromeScaling { get; private set; }
         private static readonly ILog LOG = LogManager.GetLogger(typeof(GreenshotForm));
         protected static ICoreConfiguration coreConfiguration => IniConfigHelper.EnsureSection<ICoreConfiguration>(() => new CoreConfigurationImpl());
         [ThreadStatic]
@@ -157,6 +158,7 @@ namespace Greenshot.Base.Controls
                     InitializeLanguage();
                 }
                 base.OnLoad(e);
+                InitializeUiChromeScaling();
 #if DEBUG
             }
             else
@@ -179,11 +181,17 @@ namespace Greenshot.Base.Controls
             }
         }
 
+        protected void InitializeUiChromeScaling()
+        {
+            if (UiChromeScaling == null) UiChromeScaling = new UiChromeScale(this, coreConfiguration);
+        }
+
         // Clean up any resources being used.
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
+                UiChromeScaling?.Dispose();
                 Texts.Config.LanguageChanged -= OnLanguageChanged;
             }
 

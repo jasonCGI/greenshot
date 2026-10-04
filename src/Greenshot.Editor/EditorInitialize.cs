@@ -66,6 +66,11 @@ namespace Greenshot.Editor
                     new WpfFileFormatHandler()
                 );
 
+            if (!CoreConfig.IsBetaTester)
+            {
+                SimpleServiceProvider.Current.AddService<IFileFormatHandler>(new WebpFileFormatHandler());
+            }
+
             IFileFormatRegistry registry = SimpleServiceProvider.Current.GetInstance<IFileFormatRegistry>();
             foreach (var handler in SimpleServiceProvider.Current.GetAllInstances<IFileFormatHandler>().OfType<AbstractFileFormatHandler>())
             {

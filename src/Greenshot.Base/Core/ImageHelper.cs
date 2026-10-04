@@ -48,6 +48,8 @@ namespace Greenshot.Base.Core
     /// </summary>
     public static class ImageHelper
     {
+        public const int MaximumResizeDimension = 32767;
+        public const long MaximumResizePixelCount = 100000000;
         private static readonly ILog Log = LogManager.GetLogger(typeof(ImageHelper));
         private static readonly ICoreConfiguration CoreConfig = IniConfigRegistry.GetSection<ICoreConfiguration>();
         private const int ExifOrientationId = 0x0112;
@@ -1461,7 +1463,63 @@ namespace Greenshot.Base.Core
         }
 
         /// <summary>
-        /// Scale the bitmap, keeping aspect ratio, but the canvas will always have the specified size.
+        /// Validate resize bounds and calculate pixel dimensions once, without allocating a bitmap.
+        /// Aspect-locked images fit inside positive requested bounds, rounded to the nearest whole pixel.
+        /// One zero axis derives that size from the other axis when aspect ratio is maintained.
+        /// The limits guard accidental allocations; they do not guarantee available memory.
+        /// </summary>
+        public static System.Drawing.Size GetResizeSize(System.Drawing.Size sourceSize, bool maintainAspectRatio, int newWidth, int newHeight)
+        {
+            if (sourceSize.Width <= 0 || sourceSize.Height <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(sourceSize), sourceSize, "Source dimensions must be positive.");
+            }
+            if (newWidth < 0 || newWidth > MaximumResizeDimension ||
+                (newWidth == 0 && (!maintainAspectRatio || newHeight == 0)))
+            {
+                throw new ArgumentOutOfRangeException(nameof(newWidth), newWidth,
+                    "Resize width must be from 1 to 32767 pixels, or zero for an automatic aspect-locked axis.");
+            }
+            if (newHeight < 0 || newHeight > MaximumResizeDimension ||
+                (newHeight == 0 && !maintainAspectRatio))
+            {
+                throw new ArgumentOutOfRangeException(nameof(newHeight), newHeight,
+                    "Resize height must be from 1 to 32767 pixels, or zero for an automatic aspect-locked axis.");
+            }
+            if ((long)newWidth * newHeight > MaximumResizePixelCount)
+            {
+                throw new ArgumentOutOfRangeException(nameof(newWidth), "Resize bounds must not exceed 100,000,000 pixels in total.");
+            }
+            if (!maintainAspectRatio)
+            {
+                // Explicit pixel sizes must not lose a pixel through division and float truncation.
+                return new System.Drawing.Size(newWidth, newHeight);
+            }
+
+            // Cross-products choose the smaller scale without a floating-point comparison.
+            // Divide an exact integer product only once so half-pixel ties stay exact for ToEven.
+            bool widthLimits = newHeight == 0 || (newWidth > 0 &&
+                (long)newWidth * sourceSize.Height <= (long)newHeight * sourceSize.Width);
+            double width = widthLimits ? newWidth :
+                Math.Round((double)sourceSize.Width * newHeight / sourceSize.Height, MidpointRounding.ToEven);
+            double height = widthLimits ?
+                Math.Round((double)sourceSize.Height * newWidth / sourceSize.Width, MidpointRounding.ToEven) : newHeight;
+            if (newWidth > 0) width = Math.Min(newWidth, width);
+            if (newHeight > 0) height = Math.Min(newHeight, height);
+            if (width < 1 || height < 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(newWidth), "The aspect-locked size would round below one pixel on a side.");
+            }
+            // Validate automatic axes before converting to integers or allocating their bitmap.
+            if (width > MaximumResizeDimension || height > MaximumResizeDimension || width * height > MaximumResizePixelCount)
+            {
+                throw new ArgumentOutOfRangeException(nameof(newWidth), "Derived resize dimensions exceed the allocation guardrails.");
+            }
+            return new System.Drawing.Size((int)width, (int)height);
+        }
+
+        /// <summary>
+        /// Scale the bitmap within the requested bounds, optionally retaining the specified canvas size.
         /// </summary>
         /// <param name="sourceImage">Image to scale</param>
         /// <param name="maintainAspectRatio">true to maintain the aspect ratio</param>
@@ -1473,57 +1531,21 @@ namespace Greenshot.Base.Core
         /// <returns>a new bitmap with the specified size, the source-Image scaled to fit with aspect ratio locked</returns>
         public static Image ResizeImage(Image sourceImage, bool maintainAspectRatio, bool canvasUseNewSize, Color backgroundColor, int newWidth, int newHeight, Matrix matrix)
         {
+            if (sourceImage == null)
+            {
+                throw new ArgumentNullException(nameof(sourceImage));
+            }
+            System.Drawing.Size destinationSize = GetResizeSize(sourceImage.Size, maintainAspectRatio, newWidth, newHeight);
+            int destWidth = destinationSize.Width;
+            int destHeight = destinationSize.Height;
+            if (newWidth == 0) newWidth = destWidth;
+            if (newHeight == 0) newHeight = destHeight;
             int destX = 0;
             int destY = 0;
-
-            var nPercentW = newWidth / (float) sourceImage.Width;
-            var nPercentH = newHeight / (float) sourceImage.Height;
-            if (maintainAspectRatio)
+            if (maintainAspectRatio && canvasUseNewSize)
             {
-                if ((int) nPercentW == 1)
-                {
-                    nPercentW = nPercentH;
-                    if (canvasUseNewSize)
-                    {
-                        destX = Math.Max(0, Convert.ToInt32((newWidth - sourceImage.Width * nPercentW) / 2));
-                    }
-                }
-                else if ((int) nPercentH == 1)
-                {
-                    nPercentH = nPercentW;
-                    if (canvasUseNewSize)
-                    {
-                        destY = Math.Max(0, Convert.ToInt32((newHeight - sourceImage.Height * nPercentH) / 2));
-                    }
-                }
-                else if ((int) nPercentH != 0 && nPercentH < nPercentW)
-                {
-                    nPercentW = nPercentH;
-                    if (canvasUseNewSize)
-                    {
-                        destX = Math.Max(0, Convert.ToInt32((newWidth - sourceImage.Width * nPercentW) / 2));
-                    }
-                }
-                else
-                {
-                    nPercentH = nPercentW;
-                    if (canvasUseNewSize)
-                    {
-                        destY = Math.Max(0, Convert.ToInt32((newHeight - sourceImage.Height * nPercentH) / 2));
-                    }
-                }
-            }
-
-            int destWidth = (int) (sourceImage.Width * nPercentW);
-            int destHeight = (int) (sourceImage.Height * nPercentH);
-            if (newWidth == 0)
-            {
-                newWidth = destWidth;
-            }
-
-            if (newHeight == 0)
-            {
-                newHeight = destHeight;
+                destX = Convert.ToInt32((newWidth - destWidth) / 2.0);
+                destY = Convert.ToInt32((newHeight - destHeight) / 2.0);
             }
 
             Image newImage;

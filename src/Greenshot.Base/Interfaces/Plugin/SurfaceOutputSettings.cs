@@ -38,7 +38,11 @@ namespace Greenshot.Base.Interfaces.Plugin
         {
             _disableReduceColors = false;
             Format = CoreConfig.OutputFileFormat;
+            ExportDpiPreset = CoreConfig.OutputFileDpiPreset;
+            CustomDpi = CoreConfig.OutputFileCustomDpi;
             JPGQuality = CoreConfig.OutputFileJpegQuality;
+            WebpLossless = CoreConfig.OutputFileWebpLossless;
+            WebpQuality = CoreConfig.OutputFileWebpQuality;
             ReduceColors = CoreConfig.OutputFileReduceColors;
         }
 
@@ -50,6 +54,7 @@ namespace Greenshot.Base.Interfaces.Plugin
         public SurfaceOutputSettings(string format, int quality) : this(format)
         {
             JPGQuality = quality;
+            WebpQuality = quality;
         }
 
         public SurfaceOutputSettings(string format, int quality, bool reduceColors) : this(format, quality)
@@ -74,7 +79,19 @@ namespace Greenshot.Base.Interfaces.Plugin
 
         public string Format { get; set; }
 
+        public System.Drawing.Size PreviewSize { get; set; }
+        public float PreviewDpiX { get; set; }
+        public float PreviewDpiY { get; set; }
+
+        public ExportDpiPreset ExportDpiPreset { get; set; }
+
+        public int CustomDpi { get; set; }
+
         public int JPGQuality { get; set; }
+
+        public bool WebpLossless { get; set; }
+
+        public int WebpQuality { get; set; }
 
         public bool SaveBackgroundOnly { get; set; }
 

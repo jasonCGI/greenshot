@@ -351,8 +351,17 @@ namespace Greenshot.Forms
             try
             {
                 InitializeComponent();
+                contextmenu_quicksettings.DropDownOpening += (sender, args) =>
+                {
+                    if (contextmenu_quicksettings.DropDownItems["QuickExportDpi"] is ToolStripMenuItem dpiMenu)
+                    {
+                        ExportDpiQuickPreferences.Refresh(dpiMenu, _conf);
+                    }
+                };
                 ApplyImages();
                 InitializeLanguage();
+                InitializeUiChromeScaling();
+                UiChromeScaling.Add(contextMenu);
             }
             catch (ArgumentException ex)
             {
@@ -762,6 +771,7 @@ namespace Greenshot.Forms
         {
             var factor = DeviceDpi / 96f;
             contextMenu.Scale(new SizeF(factor, factor));
+            UiChromeScaling?.Refresh();
             // Phase 1 only checks the formats; when a file list, virtual files or HTML could contain an image, phase 2 checks them in the background
             bool? clipboardImage = ClipboardHelper.ContainsImageQuick();
             contextmenu_captureclipboard.Enabled = clipboardImage == true;
@@ -989,10 +999,15 @@ namespace Greenshot.Forms
             };
 
             captureScreenMenuItem.DropDownItems.Add(captureScreenItem);
+            var pointerMonitor = Screen.FromPoint(Cursor.Position).Bounds;
+            var currentMonitorItem = new ToolStripMenuItem(Texts.Core.ContextmenuCapturemonitorCurrent);
+            currentMonitorItem.Click += delegate { RunLater(() => CaptureHelper.CaptureRegion(false, pointerMonitor)); };
+            captureScreenMenuItem.DropDownItems.Add(currentMonitorItem);
+            int monitorNumber = 0;
             foreach (var displayInfo in DisplayInfo.AllDisplayInfos)
             {
                 var displayToCapture = displayInfo;
-                string deviceAlignment = displayToCapture.DeviceName;
+                string deviceAlignment = $"Monitor {++monitorNumber}: {displayToCapture.DeviceName} ({displayToCapture.Bounds.Width} x {displayToCapture.Bounds.Height})";
                     
                 if (displayInfo.Bounds.Top == allScreensBounds.Top && displayInfo.Bounds.Bottom != allScreensBounds.Bottom)
                 {
@@ -1422,6 +1437,12 @@ namespace Greenshot.Forms
             }
 
             AddRecipeQuickSettings();
+            contextmenu_quicksettings.DropDownItems.Add(ExportDpiQuickPreferences.Create(_conf, initialDpi =>
+            {
+                var dialog = new Greenshot.Base.Wpf.CustomDpiWindow(initialDpi);
+                new WindowInteropHelper(dialog) { Owner = Handle };
+                return dialog.ShowDialog() == true ? dialog.Value : (int?)null;
+            }));
         }
 
         /// <summary>

@@ -31,6 +31,24 @@ namespace Greenshot.Base.Languages
     [IniLanguageSection("Editor")]
     public interface IEditorLanguage : INotifyPropertyChanged
     {
+        [DefaultValue("Inches")]
+        string ResizeInches { get; }
+
+        [DefaultValue("Centimeters")]
+        string ResizeCentimeters { get; }
+
+        [DefaultValue("Print DPI")]
+        string ResizePrintDpi { get; }
+
+        [DefaultValue("Allow upscaling")]
+        string ResizeAllowUpscale { get; }
+
+        [DefaultValue("Enter a whole number from 1 to 2400 DPI.")]
+        string ResizeDpiInvalid { get; }
+
+        [DefaultValue("This enlarges the image without adding detail. Check Allow upscaling to continue.")]
+        string ResizeUpscaleWarning { get; }
+
         /// <summary>
         /// Bottom
         /// </summary>
@@ -600,6 +618,24 @@ namespace Greenshot.Base.Languages
         /// Resize settings
         /// </summary>
         string ResizeSettings { get; }
+
+        /// <summary>
+        /// Enter a positive number for width and height. Do not use grouping separators or scientific notation.
+        /// </summary>
+        [DefaultValue("Enter a positive number for width and height. Do not use grouping separators or scientific notation.")]
+        string ResizeValidationInvalid { get; }
+
+        /// <summary>
+        /// Output dimensions must be 1 to 32767 pixels per side and no more than 100,000,000 pixels total.
+        /// </summary>
+        [DefaultValue("Output dimensions must be 1 to 32767 pixels per side and no more than 100,000,000 pixels total.")]
+        string ResizeValidationLimits { get; }
+
+        /// <summary>
+        /// Resizing this size would round below one pixel on a side. Choose a slightly larger size.
+        /// </summary>
+        [DefaultValue("Resizing this size would round below one pixel on a side. Choose a slightly larger size.")]
+        string ResizeValidationTooSmall { get; }
 
         /// <summary>
         /// Width

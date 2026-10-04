@@ -31,6 +31,9 @@ namespace Greenshot.Base.Languages
     [IniLanguageSection("Core")]
     public interface ICoreLanguage : INotifyPropertyChanged
     {
+        [DefaultValue("This monitor (pointer location)")]
+        string ContextmenuCapturemonitorCurrent { get; }
+
         /// <summary>
         /// Please report bugs to
         /// </summary>

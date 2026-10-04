@@ -110,6 +110,7 @@ namespace Greenshot.Destinations
 
             if (_options?.OutputSettings == null && CoreConfig.OutputFilePromptQuality && request.Ui.IsInteractive)
             {
+                await ExportSummary.PopulateAsync(request.Source, outputSettings, cancellationToken).ConfigureAwait(false);
                 outputSettings = await request.Ui.PromptOutputSettingsAsync(outputSettings, cancellationToken).ConfigureAwait(false);
                 if (outputSettings == null)
                 {
@@ -188,6 +189,7 @@ namespace Greenshot.Destinations
             var outputSettings = new SurfaceOutputSettings(ImageIO.FormatForFilename(fileNameWithExtension));
             if (CoreConfig.OutputFilePromptQuality)
             {
+                await ExportSummary.PopulateAsync(request.Source, outputSettings, cancellationToken).ConfigureAwait(false);
                 outputSettings = await request.Ui.PromptOutputSettingsAsync(outputSettings, cancellationToken).ConfigureAwait(false);
                 if (outputSettings == null)
                 {

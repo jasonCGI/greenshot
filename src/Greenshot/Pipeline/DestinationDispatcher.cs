@@ -128,6 +128,7 @@ namespace Greenshot.Pipeline
             if (hasFileDestination && promptQuality && userInteraction.IsInteractive)
             {
                 // Asked once for all file destinations of the flow; cancelling it means: don't save, the other destinations still run
+                await ExportSummary.PopulateAsync(source, sharedFileOutputSettings, cancellationToken).ConfigureAwait(false);
                 var promptedSettings = await userInteraction.PromptOutputSettingsAsync(sharedFileOutputSettings, cancellationToken).ConfigureAwait(false);
                 skipFileDestinations = promptedSettings == null;
                 sharedFileOutputSettings = promptedSettings ?? sharedFileOutputSettings;

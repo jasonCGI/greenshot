@@ -73,6 +73,9 @@
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="Border" Property="Background" Value="{Binding Source={x:Static wpf:ThemeManager.Instance}, Path=ButtonPressedBrush}"/>
                             </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
@@ -84,7 +87,7 @@
             <Setter Property="Foreground" Value="{Binding Source={x:Static wpf:ThemeManager.Instance}, Path=ForegroundBrush}"/>
             <Setter Property="BorderBrush" Value="{Binding Source={x:Static wpf:ThemeManager.Instance}, Path=BorderBrush}"/>
             <Setter Property="Padding" Value="6,4"/>
-            <Setter Property="Height" Value="28"/>
+            <Setter Property="Height" Value="34"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
 
@@ -132,7 +135,7 @@
             <Setter Property="Foreground" Value="{Binding Source={x:Static wpf:ThemeManager.Instance}, Path=ForegroundBrush}"/>
             <Setter Property="BorderBrush" Value="{Binding Source={x:Static wpf:ThemeManager.Instance}, Path=BorderBrush}"/>
             <Setter Property="Padding" Value="8,4"/>
-            <Setter Property="Height" Value="28"/>
+            <Setter Property="Height" Value="34"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
@@ -276,6 +279,10 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <!-- Width -->
@@ -294,11 +301,22 @@
                 <TextBox Grid.Row="1" Grid.Column="1" x:Name="HeightTextBox" Margin="0,6,8,6"/>
                 <ComboBox Grid.Row="1" Grid.Column="2" x:Name="HeightUnitComboBox" Margin="0,6"/>
 
+                <Label Grid.Row="4" Grid.Column="0" Content="{wpf:Text Editor.ResizePrintDpi}" Target="{Binding ElementName=DpiTextBox}" VerticalAlignment="Center"/>
+                <TextBox Grid.Row="4" Grid.Column="1" x:Name="DpiTextBox" Text="300" Margin="0,6,8,6"/>
+                <TextBlock Grid.Row="5" Grid.ColumnSpan="3" x:Name="ResizeSummary" TextWrapping="Wrap" Margin="0,8,0,0"/>
+                <CheckBox Grid.Row="6" Grid.ColumnSpan="3" x:Name="AllowUpscaleCheckBox" Content="{wpf:Text Editor.ResizeAllowUpscale}" Margin="0,8,0,0" Visibility="Collapsed"/>
                 <!-- Maintain Aspect Ratio -->
                 <CheckBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
                           x:Name="MaintainAspectRatioCheckBox"
                           Content="{wpf:Text Editor.ResizeAspectratio}"
                           Margin="0,10,0,4"/>
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"
+                           x:Name="ValidationMessage"
+                           TextWrapping="Wrap"
+                           Visibility="Collapsed"
+                           Margin="0,10,0,0"
+                           Foreground="{Binding Source={x:Static wpf:ThemeManager.Instance}, Path=ForegroundBrush}"/>
             </Grid>
 
             <!-- Buttons -->
@@ -309,6 +327,7 @@
                     Padding="16,10">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="{wpf:Text Core.Ok}" 
+                            x:Name="OkButton"
                             IsDefault="True"
                             Width="80"
                             Click="OkButton_Click"/>

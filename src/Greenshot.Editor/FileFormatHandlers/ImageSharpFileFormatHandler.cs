@@ -67,6 +67,13 @@ namespace Greenshot.Editor.FileFormatHandlers
         /// <inheritdoc />
         public override bool TrySaveToStream(Bitmap bitmap, Stream destination, string extension, ISurface surface = null, SurfaceOutputSettings surfaceOutputSettings = null)
         {
+            if (extension == ".webp")
+            {
+                surfaceOutputSettings ??= new SurfaceOutputSettings(WellKnownFileFormats.Webp);
+                // Direct handler callers must validate too, before conversion or stream writes.
+                WebpExportSettings.ValidateQuality(surfaceOutputSettings.WebpLossless, surfaceOutputSettings.WebpQuality);
+                WebpExportSettings.ValidateSize(bitmap.Size);
+            }
             using var image = ImageSharpHelper.ConvertToImageSharp(bitmap);
             if (image == null)
             {
@@ -117,7 +124,13 @@ namespace Greenshot.Editor.FileFormatHandlers
                 ".tif" => new TiffEncoder() { Quantizer = quantizer, BitsPerPixel = surfaceOutputSettings.ReduceColors ? TiffBitsPerPixel.Bit8 : hasAlpha? null :  TiffBitsPerPixel.Bit24 },
                 ".tga" => new TgaEncoder(),
                 ".pbm" => new PbmEncoder(),
-                ".webp" => new WebpEncoder() { Quality = surfaceOutputSettings.JPGQuality },
+                ".webp" => new WebpEncoder()
+                {
+                    FileFormat = surfaceOutputSettings.WebpLossless ? WebpFileFormatType.Lossless : WebpFileFormatType.Lossy,
+                    Quality = surfaceOutputSettings.WebpLossless ? 100 : surfaceOutputSettings.WebpQuality,
+                    NearLossless = false,
+                    TransparentColorMode = WebpTransparentColorMode.Preserve
+                },
                 _ => null
             };
             if (encoder == null)

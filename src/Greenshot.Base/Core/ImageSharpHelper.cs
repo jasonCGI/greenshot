@@ -24,6 +24,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using Dapplo.Windows.Common.Structs;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Metadata;
 using SixLabors.ImageSharp.PixelFormats;
 using Image = SixLabors.ImageSharp.Image;
 
@@ -95,6 +96,9 @@ public static class ImageSharpHelper
 
         // 1. Create ImageSharp container
         var image = new Image<TPixel>(width, height);
+        image.Metadata.ResolutionUnits = PixelResolutionUnit.PixelsPerInch;
+        image.Metadata.HorizontalResolution = bitmap.HorizontalResolution;
+        image.Metadata.VerticalResolution = bitmap.VerticalResolution;
 
         // 2. Lock GDI+ Bitmap
         var rect = new NativeRect(0, 0, width, height);

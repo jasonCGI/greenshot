@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Forms;
 using Dapplo.Ini;
 using Greenshot.Base;
@@ -34,6 +35,8 @@ using Greenshot.Configuration;
 using Greenshot.Helpers;
 using Greenshot.Base.Languages;
 using MessageBox = System.Windows.MessageBox;
+using WpfTextBox = System.Windows.Controls.TextBox;
+using WpfValidation = System.Windows.Controls.Validation;
 
 namespace Greenshot.Forms.Wpf
 {
@@ -230,6 +233,11 @@ namespace Greenshot.Forms.Wpf
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
+            if (!ValidateCustomDpiInput())
+            {
+                return;
+            }
+
             HotkeyManager.UnregisterHotkeys();
             SaveSettings();
             HotkeyHelper.RegisterHotkeys();
@@ -239,6 +247,44 @@ namespace Greenshot.Forms.Wpf
 
             DialogResult = true;
             Close();
+        }
+
+        private void UiScaleReset_Click(object sender, RoutedEventArgs e) => _viewModel.UiScalePercent = 100;
+
+        private bool ValidateCustomDpiInput()
+        {
+            if (!CustomDpiInput.IsEnabled)
+            {
+                return true;
+            }
+
+            CustomDpiInput.GetBindingExpression(WpfTextBox.TextProperty)?.UpdateSource();
+            if (WpfValidation.GetHasError(CustomDpiInput) ||
+                !ExportDpiSettings.TryParseCustomDpi(CustomDpiInput.Text, out _))
+            {
+                CustomDpiInput.Focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        private void CustomDpiInput_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (!(sender is WpfTextBox input) || input.IsEnabled)
+            {
+                return;
+            }
+
+            // WPF can retain a style binding's old validation error after switching to the dormant binding.
+            foreach (var error in WpfValidation.GetErrors(input).ToArray())
+            {
+                if (error.BindingInError is BindingExpressionBase binding)
+                {
+                    WpfValidation.ClearInvalid(binding);
+                }
+            }
+            input.GetBindingExpression(WpfTextBox.TextProperty)?.UpdateTarget();
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)

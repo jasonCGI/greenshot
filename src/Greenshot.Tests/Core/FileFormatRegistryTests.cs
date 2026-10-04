@@ -107,7 +107,8 @@ namespace Greenshot.Tests.Core
         public void WellKnownFileFormats_IsFormat_ValidatesKnownFormatAndComparesCaseInsensitively()
         {
             Assert.True(WellKnownFileFormats.IsEqualFormat(WellKnownFileFormats.Png, "PNG"));
-            Assert.False(WellKnownFileFormats.IsEqualFormat("webp", "webp"));
+            Assert.True(WellKnownFileFormats.IsEqualFormat(WellKnownFileFormats.Webp, "WEBP"));
+            Assert.False(WellKnownFileFormats.IsEqualFormat("unknown", "unknown"));
         }
 
         [Fact]

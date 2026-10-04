@@ -35,6 +35,7 @@ public static class WellKnownFileFormats
     public const string Gif = "gif";
     public const string Jpg = "jpg";
     public const string Png = "png";
+    public const string Webp = "webp";
     public const string Tiff = "tiff";
     public const string Jxr = "jxr";
     public const string Greenshot = "greenshot";
@@ -57,6 +58,7 @@ public static class WellKnownFileFormats
                string.Equals(format, Gif, StringComparison.OrdinalIgnoreCase) ||
                string.Equals(format, Jpg, StringComparison.OrdinalIgnoreCase) ||
                string.Equals(format, Png, StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(format, Webp, StringComparison.OrdinalIgnoreCase) ||
                string.Equals(format, Tiff, StringComparison.OrdinalIgnoreCase) ||
                string.Equals(format, Jxr, StringComparison.OrdinalIgnoreCase) ||
                string.Equals(format, Greenshot, StringComparison.OrdinalIgnoreCase) ||

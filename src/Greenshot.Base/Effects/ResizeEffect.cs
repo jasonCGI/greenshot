@@ -41,6 +41,8 @@ namespace Greenshot.Base.Effects
         public int Height { get; set; }
         public bool MaintainAspectRatio { get; set; }
 
+        public int? ResolutionDpi { get; set; }
+
         public void Reset()
         {
             // values don't have a default value
@@ -48,7 +50,16 @@ namespace Greenshot.Base.Effects
 
         public Image Apply(Image sourceImage, Matrix matrix)
         {
-            return ImageHelper.ResizeImage(sourceImage, MaintainAspectRatio, Width, Height, matrix);
+            if (ResolutionDpi.HasValue && !ExportDpiSettings.IsValidCustomDpi(ResolutionDpi.Value))
+            {
+                throw new System.ArgumentOutOfRangeException(nameof(ResolutionDpi));
+            }
+            var resized = ImageHelper.ResizeImage(sourceImage, MaintainAspectRatio, Width, Height, matrix);
+            if (ResolutionDpi.HasValue && resized is Bitmap bitmap)
+            {
+                bitmap.SetResolution(ResolutionDpi.Value, ResolutionDpi.Value);
+            }
+            return resized;
         }
     }
 }

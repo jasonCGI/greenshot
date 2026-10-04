@@ -219,12 +219,19 @@ namespace Greenshot.Base.Core.Export
         /// </summary>
         private static string CacheKey(SurfaceOutputSettings settings)
         {
+            // Validate before rendering or returning a cached image, and ignore dormant custom values.
+            WebpExportSettings.Validate(settings);
+            float? resolution = ExportDpiSettings.GetResolution(settings);
             if (settings.Effects != null && settings.Effects.Count > 0)
             {
                 return null;
             }
 
-            return $"{settings.Format}|{settings.JPGQuality}|{settings.ReduceColors}|{settings.DisableReduceColors}|{settings.SaveBackgroundOnly}";
+            float customDpi = settings.ExportDpiPreset == ExportDpiPreset.Custom ? resolution.GetValueOrDefault() : 0;
+            bool isWebp = WebpExportSettings.IsWebp(settings.Format);
+            string webpEncoding = isWebp ? $"{settings.WebpLossless}|{(settings.WebpLossless ? 0 : settings.WebpQuality)}" : string.Empty;
+            int jpegQuality = isWebp ? 0 : settings.JPGQuality;
+            return $"{settings.Format}|{jpegQuality}|{settings.ReduceColors}|{settings.DisableReduceColors}|{settings.SaveBackgroundOnly}|{settings.ExportDpiPreset}|{customDpi}|{webpEncoding}";
         }
 
         private void ThrowIfDisposed()

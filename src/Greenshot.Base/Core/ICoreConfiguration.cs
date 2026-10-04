@@ -38,6 +38,10 @@ namespace Greenshot.Base.Core
     [Description("Greenshot core configuration")]
     public interface ICoreConfiguration : IIniSection, INotifyPropertyChanged, IAfterLoad, IBeforeSave
     {
+        [Description("Application UI size in percent, independent of image zoom and export DPI (100, 125, 150, 200).")]
+        [DefaultValue(100)]
+        int UiScalePercent { get; set; }
+
         [Description("The language in IETF format (e.g. en-US)")]
         string Language { get; set; }
 
@@ -140,6 +144,15 @@ namespace Greenshot.Base.Core
         [DefaultValue(WellKnownFileFormats.Png)]
         string OutputFileFormat { get; set; }
 
+        [Description("Resolution metadata for exported images (Preserve, Web: 72 DPI, Print: 300 DPI, Custom). Pixel dimensions stay the same.")]
+        [DefaultValue("Preserve")]
+        ExportDpiPreset OutputFileDpiPreset { get; set; }
+
+        [Description("Custom export resolution from 1 to 2400 DPI. Used only by the Custom preset; pixel dimensions stay the same.")]
+        [DefaultValue(96)]
+        [Range(1, 2400, ErrorMessage = "Custom export resolution must be a whole number from 1 to 2400 DPI.")]
+        int OutputFileCustomDpi { get; set; }
+
         [Description("If set to true, than the colors of the output file are reduced to 256 (8-bit) colors")]
         [DefaultValue(false)]
         bool OutputFileReduceColors { get; set; }
@@ -163,6 +176,15 @@ namespace Greenshot.Base.Core
         [DefaultValue(80)]
         [Range(0, 100, ErrorMessage = "JPEG quality must be between 0 and 100.")]
         int OutputFileJpegQuality { get; set; }
+
+        [Description("Use lossless WebP compression. Both lossy and lossless WebP are compressed formats.")]
+        [DefaultValue(false)]
+        bool OutputFileWebpLossless { get; set; }
+
+        [Description("Lossy WebP quality from 0 to 100. Ignored by exact lossless compression.")]
+        [DefaultValue(80)]
+        [Range(0, 100, ErrorMessage = "WebP quality must be between 0 and 100.")]
+        int OutputFileWebpQuality { get; set; }
 
         [Description("Ask for the quality before saving?")]
         [DefaultValue(false)]

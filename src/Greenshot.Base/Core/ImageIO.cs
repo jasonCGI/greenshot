@@ -94,11 +94,16 @@ namespace Greenshot.Base.Core
         public static void SaveToStream(ISurface surface, Stream stream, SurfaceOutputSettings outputSettings)
         {
             bool disposeImage = CreateImageFromSurface(surface, outputSettings, out var imageToSave);
-            SaveToStream(imageToSave, surface, stream, outputSettings);
-            // cleanup if needed
-            if (disposeImage)
+            try
             {
-                imageToSave?.Dispose();
+                SaveToStream(imageToSave, surface, stream, outputSettings);
+            }
+            finally
+            {
+                if (disposeImage)
+                {
+                    imageToSave?.Dispose();
+                }
             }
         }
 
@@ -113,8 +118,11 @@ namespace Greenshot.Base.Core
         /// <param name="outputSettings">SurfaceOutputSettings</param>
         public static void SaveToStream(Image imageToSave, ISurface surface, Stream stream, SurfaceOutputSettings outputSettings)
         {
+            WebpExportSettings.Validate(outputSettings);
+            if (WebpExportSettings.IsWebp(outputSettings.Format)) WebpExportSettings.ValidateSize(imageToSave.Size);
             bool useMemoryStream = false;
             MemoryStream memoryStream = null;
+            Image resolutionImage = null;
             if (WellKnownFileFormats.IsEqualFormat(WellKnownFileFormats.Greenshot, outputSettings.Format) && surface == null)
             {
                 throw new ArgumentException("Surface needs to be set when using OutputFormat .greenshot");
@@ -122,6 +130,15 @@ namespace Greenshot.Base.Core
 
             try
             {
+                // Pre-rendered exports also pass here. Never change the caller's bitmap.
+                if (ApplyExportResolution(imageToSave, false, outputSettings, out var exportImage))
+                {
+                    // Own the result only after a successful clone. Validation failures
+                    // must not make cleanup dispose the caller's source image.
+                    resolutionImage = exportImage;
+                    imageToSave = resolutionImage;
+                }
+
                 // Check if we want to use a memory stream, to prevent issues with non seekable streams
                 // The save is made to the targetStream, this is directed to either the MemoryStream or the original
                 Stream targetStream = stream;
@@ -148,6 +165,7 @@ namespace Greenshot.Base.Core
             finally
             {
                 memoryStream?.Dispose();
+                resolutionImage?.Dispose();
             }
         }
 
@@ -160,6 +178,9 @@ namespace Greenshot.Base.Core
         /// <returns>true if the image must be disposed</returns>
         public static bool CreateImageFromSurface(ISurface surface, SurfaceOutputSettings outputSettings, out Image imageToSave)
         {
+            // Validate before asking the surface to allocate an owned export image.
+            WebpExportSettings.Validate(outputSettings);
+            ExportDpiSettings.GetResolution(outputSettings);
             if (WellKnownFileFormats.IsEqualFormat(WellKnownFileFormats.Greenshot, outputSettings.Format) || outputSettings.SaveBackgroundOnly)
             {
                 // We save the image of the surface, this should not be disposed
@@ -189,6 +210,9 @@ namespace Greenshot.Base.Core
         public static bool CreateImageForOutput(Image sourceImage, bool ownsSourceImage, SurfaceOutputSettings outputSettings, out Image imageToSave)
         {
             imageToSave = sourceImage;
+            // Invalid active settings must fail before effects or color reduction mutate an owned source.
+            WebpExportSettings.Validate(outputSettings);
+            ExportDpiSettings.GetResolution(outputSettings);
             bool disposeImage = ownsSourceImage;
 
             Image tmpImage;
@@ -213,9 +237,9 @@ namespace Greenshot.Base.Core
             }
 
             // check for color reduction, forced or automatically, only when the DisableReduceColors is false 
-            if (outputSettings.DisableReduceColors || (!CoreConfig.OutputFileAutoReduceColors && !outputSettings.ReduceColors))
+            if (WebpExportSettings.IsWebp(outputSettings.Format) || outputSettings.DisableReduceColors || (!CoreConfig.OutputFileAutoReduceColors && !outputSettings.ReduceColors))
             {
-                return disposeImage;
+                return ApplyExportResolution(imageToSave, disposeImage, outputSettings, out imageToSave);
             }
 
             bool isAlpha = Image.IsAlphaPixelFormat(imageToSave.PixelFormat);
@@ -226,13 +250,15 @@ namespace Greenshot.Base.Core
                 Log.InfoFormat("Image with format {0} has {1} colors", imageToSave.PixelFormat, colorCount);
                 if (!outputSettings.ReduceColors && colorCount >= 256)
                 {
-                    return disposeImage;
+                    return ApplyExportResolution(imageToSave, disposeImage, outputSettings, out imageToSave);
                 }
 
                 try
                 {
                     Log.Info("Reducing colors on bitmap to 256.");
                     tmpImage = quantizer.GetQuantizedImage(CoreConfig.OutputFileReduceColorsTo);
+                    // The quantizer creates a fresh bitmap with default DPI.
+                    ((Bitmap)tmpImage).SetResolution(imageToSave.HorizontalResolution, imageToSave.VerticalResolution);
                     if (disposeImage)
                     {
                         imageToSave.Dispose();
@@ -252,7 +278,45 @@ namespace Greenshot.Base.Core
                 Log.Info("Skipping 'optional' color reduction as the image has alpha");
             }
 
-            return disposeImage;
+            return ApplyExportResolution(imageToSave, disposeImage, outputSettings, out imageToSave);
+        }
+
+        /// <summary>
+        /// Set export DPI without resizing pixels or modifying a borrowed source image.
+        /// Only PNG and JPEG apply these metadata presets.
+        /// </summary>
+        private static bool ApplyExportResolution(Image sourceImage, bool ownsSourceImage,
+            SurfaceOutputSettings outputSettings, out Image imageToSave)
+        {
+            imageToSave = sourceImage;
+            float? resolution = ExportDpiSettings.GetResolution(outputSettings);
+            if (!resolution.HasValue)
+            {
+                return ownsSourceImage;
+            }
+
+            float dpi = resolution.Value;
+            if (sourceImage.HorizontalResolution == dpi && sourceImage.VerticalResolution == dpi)
+            {
+                return ownsSourceImage;
+            }
+
+            var bitmap = ownsSourceImage ? (Bitmap)sourceImage : (Bitmap)sourceImage.Clone();
+            try
+            {
+                bitmap.SetResolution(dpi, dpi);
+            }
+            catch
+            {
+                if (!ownsSourceImage)
+                {
+                    bitmap.Dispose();
+                }
+                throw;
+            }
+
+            imageToSave = bitmap;
+            return true;
         }
 
         /// <summary>
@@ -308,6 +372,15 @@ namespace Greenshot.Base.Core
         /// </summary>
         public static void Save(ISurface surface, string fullPath, bool allowOverwrite, SurfaceOutputSettings outputSettings, bool copyPathToClipboard)
         {
+            WebpExportSettings.Validate(outputSettings);
+            if (WebpExportSettings.IsWebp(outputSettings.Format))
+            {
+                // Render effects and validate the final size before creating or truncating a file.
+                bool ownsImage = CreateImageFromSurface(surface, outputSettings, out var webpImage);
+                try { SaveRenderedImage(webpImage, fullPath, allowOverwrite, outputSettings, copyPathToClipboard); }
+                finally { if (ownsImage) webpImage?.Dispose(); }
+                return;
+            }
             fullPath = FilenameHelper.MakeFqFilenameSafe(fullPath);
             string path = Path.GetDirectoryName(fullPath);
 
@@ -351,6 +424,8 @@ namespace Greenshot.Base.Core
         public static void SaveRenderedImage(Image renderedBitmap, string fullPath, bool allowOverwrite,
             SurfaceOutputSettings outputSettings, bool copyPathToClipboard, SynchronizationContext uiContext = null)
         {
+            WebpExportSettings.Validate(outputSettings);
+            if (WebpExportSettings.IsWebp(outputSettings.Format)) WebpExportSettings.ValidateSize(renderedBitmap.Size);
             // Check before the file is created, otherwise an empty file is left behind
             if (WellKnownFileFormats.IsEqualFormat(WellKnownFileFormats.Greenshot, outputSettings.Format))
             {
@@ -491,6 +566,11 @@ namespace Greenshot.Base.Core
 
             try
             {
+                WebpExportSettings.Validate(outputSettings);
+                if (WebpExportSettings.IsWebp(outputSettings.Format))
+                {
+                    WebpExportSettings.ValidateSize(renderedImage.Size);
+                }
                 using (FileStream stream = new FileStream(tmpPath, FileMode.Create, FileAccess.Write))
                 {
                     SaveToStream(renderedImage, null, stream, outputSettings);

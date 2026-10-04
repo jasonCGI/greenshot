@@ -271,6 +271,19 @@ namespace Greenshot.Forms.Wpf
             }
         }
 
+        public int[] UiScaleChoices { get; } = { 100, 125, 150, 200 };
+
+        public int UiScalePercent
+        {
+            get => (int)(UiScaleSettings.Factor(CoreConfiguration.UiScalePercent) * 100);
+            set
+            {
+                if (!UiScaleSettings.IsSupported(value) || CoreConfiguration.IsConstant(nameof(CoreConfiguration.UiScalePercent))) return;
+                CoreConfiguration.UiScalePercent = value;
+                OnPropertyChanged();
+            }
+        }
+
         public ObservableCollection<DestinationItem> Destinations { get; private set; }
 
         public bool PickerSelected

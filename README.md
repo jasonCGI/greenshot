@@ -1,3 +1,10 @@
+Cardona Pipeline Tools development fork
+=======================================
+
+Unofficial Greenshot preview with export DPI presets, WebP, physical resizing, export summaries, and adjustable UI size. [Development notes and build instructions](docs/cardona-export/README.md) | [Settings screenshots](docs/cardona-export/SETTINGS-GUIDE.md) | [Whitepaper](https://cardonalab.dev/static/greenshot-export/index.html).
+
+558 focused local tests passed on October 4, 2026. Native manual acceptance remains pending. This fork is not an official Greenshot release. Upstream documentation follows.
+
 Greenshot - a free screenshot tool optimized for productivity
 =============================================================
 
