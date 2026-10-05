@@ -237,13 +237,13 @@ namespace Greenshot.Base.Core
             }
 
             // check for color reduction, forced or automatically, only when the DisableReduceColors is false 
-            if (WebpExportSettings.IsWebp(outputSettings.Format) || outputSettings.DisableReduceColors || (!CoreConfig.OutputFileAutoReduceColors && !outputSettings.ReduceColors))
+            if (WebpExportSettings.IsWebp(outputSettings.Format) || outputSettings.DisableReduceColors || (!outputSettings.AutoReduceColors && !outputSettings.ReduceColors))
             {
                 return ApplyExportResolution(imageToSave, disposeImage, outputSettings, out imageToSave);
             }
 
             bool isAlpha = Image.IsAlphaPixelFormat(imageToSave.PixelFormat);
-            if (outputSettings.ReduceColors || (!isAlpha && CoreConfig.OutputFileAutoReduceColors))
+            if (outputSettings.ReduceColors || (!isAlpha && outputSettings.AutoReduceColors))
             {
                 using var quantizer = new WuQuantizer((Bitmap) imageToSave);
                 int colorCount = quantizer.GetColorCount();

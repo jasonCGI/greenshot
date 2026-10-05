@@ -2,8 +2,15 @@
 param()
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
-if (@(Get-Process -Name Greenshot -ErrorAction SilentlyContinue).Count) {
-    throw 'Save your work and normally Exit the running Greenshot before launching this preview.'
+$executable = [IO.Path]::GetFullPath((Join-Path $root 'app\Greenshot.exe'))
+$running = @(Get-Process -Name Greenshot -ErrorAction SilentlyContinue)
+if ($running.Count) {
+    $matching = @($running | Where-Object { $_.Path -and [string]::Equals($_.Path, $executable, [StringComparison]::OrdinalIgnoreCase) })
+    if ($running.Count -eq 1 -and $matching.Count -eq 1) {
+        Start-Process -FilePath $executable -ArgumentList 'greenshot:settings' -WorkingDirectory $root
+        return
+    }
+    throw 'A different Greenshot is running. Save your work and normally Exit it before launching this preview.'
 }
 foreach ($fixed in @((Join-Path ([Environment]::GetFolderPath('ApplicationData')) 'Greenshot\greenshot-fixed.ini'), (Join-Path $root 'app\greenshot-fixed.ini'))) {
     if (Test-Path -LiteralPath $fixed) { throw 'A fixed Greenshot policy exists. Resolve its scope before using this isolated preview.' }

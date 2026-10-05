@@ -43,10 +43,12 @@ namespace Greenshot.Base.Controls
         private FilterOption[] _filterOptions;
         private DirectoryInfo _eagerlyCreatedDirectory;
         private readonly ICaptureDetails _captureDetails;
+        private readonly string _preferredFormat;
 
-        public SaveImageFileDialog(ICaptureDetails captureDetails)
+        public SaveImageFileDialog(ICaptureDetails captureDetails, string preferredFormat = null)
         {
             _captureDetails = captureDetails;
+            _preferredFormat = preferredFormat;
             Init();
         }
 
@@ -103,13 +105,13 @@ namespace Greenshot.Base.Controls
                     pngFilterIndex = i;
                 }
 
-                if (string.Equals(conf.OutputFileFormat, fo.FormatId, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(_preferredFormat ?? conf.OutputFileFormat, fo.FormatId, StringComparison.OrdinalIgnoreCase))
                 {
                     preselect = i;
                 }
             }
 
-            if (!string.Equals(conf.OutputFileFormat, _filterOptions[preselect].FormatId, StringComparison.OrdinalIgnoreCase) && pngFilterIndex >= 0)
+            if (!string.Equals(_preferredFormat ?? conf.OutputFileFormat, _filterOptions[preselect].FormatId, StringComparison.OrdinalIgnoreCase) && pngFilterIndex >= 0)
             {
                 preselect = pngFilterIndex;
             }

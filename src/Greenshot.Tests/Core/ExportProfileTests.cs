@@ -21,6 +21,38 @@ namespace Greenshot.Tests.Core
     public class ExportProfileTests
     {
         [Fact]
+        public void TemporaryProfileSettingsAreIndependentAndLeaveDefaultsAlone()
+        {
+            TestEnvironment.EnsureInitialized();
+            var config = IniConfigRegistry.GetSection<ICoreConfiguration>();
+            string format = config.OutputFileFormat;
+            var dpi = config.OutputFileDpiPreset;
+            var profile = ExportProfile.Defaults()[1];
+            var settings = profile.CreateOutputSettings();
+            Assert.Equal("jpg", settings.Format);
+            Assert.Equal(ExportDpiPreset.Print, settings.ExportDpiPreset);
+            Assert.Equal(90, settings.JPGQuality);
+            Assert.False(settings.AutoReduceColors);
+            settings.JPGQuality = 25;
+            Assert.Equal(90, profile.JpegQuality);
+            Assert.Equal(format, config.OutputFileFormat);
+            Assert.Equal(dpi, config.OutputFileDpiPreset);
+        }
+
+        [Theory]
+        [InlineData(0, "PNG · 72 DPI")]
+        [InlineData(1, "JPG · 300 DPI")]
+        [InlineData(2, "WEBP · DPI preset unavailable")]
+        public void MenuReportsFormatDensityAndPixels(int index, string expected)
+        {
+            TestEnvironment.EnsureInitialized();
+            var settings = ExportProfile.Defaults()[index].CreateOutputSettings();
+            var summary = ExportMenuSummary.Describe(settings, new System.Drawing.Size(1200, 800));
+            Assert.StartsWith(expected, summary);
+            Assert.Contains("1200 × 800 px", summary);
+        }
+
+        [Fact]
         public void FixedSettingBlocksWholeProfileBeforeAnyChanges()
         {
             string directory = Path.Combine(Path.GetTempPath(), "Greenshot-profile-" + Guid.NewGuid().ToString("N"));
@@ -32,6 +64,7 @@ namespace Greenshot.Tests.Core
                 var config = new CoreConfigurationImpl();
                 using var ini = IniConfigRegistry.ForFile(Path.Combine(directory, "settings.ini")).RegisterSection(config).AddConstantsFile(constants).Build().Load();
                 Assert.True(config.IsConstant(nameof(config.OutputFileJpegQuality)));
+                Assert.Empty(Greenshot.Destinations.ProfileFileDestination.GetChoices(config));
                 string originalFormat = config.OutputFileFormat;
                 Assert.Throws<InvalidOperationException>(() => ExportProfile.Defaults()[2].Apply(config));
                 Assert.Equal(originalFormat, config.OutputFileFormat);

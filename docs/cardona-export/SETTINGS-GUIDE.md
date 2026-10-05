@@ -24,6 +24,20 @@ This example selects Web PNG without pressing Apply, so the active DPI remains P
 
 ## Export resolution and summary
 
+The capture destination picker offers **Save as Web PNG**, **Save as Print JPEG**, **Save as Lossless WebP**, and saved custom profiles. Each choice applies to that save only; output defaults stay unchanged. Save As preselects the profile format, and you can choose another format there. The profile's DPI applies only when the final format is PNG or JPEG. Fixed export policies hide profile choices.
+
+A custom profile may enable the quality prompt. Its existing **Don't ask again** checkbox is an explicit choice to update defaults; leave it unchecked for a temporary export.
+
+Save As shows the current default format, DPI preset, and image pixels in the capture picker and editor File menu. Preserve is labeled **Preserve source DPI**. The selected file format and optional quality prompt determine the final export.
+
+![Capture picker showing DPI details and one-save profile choices](whitepaper/images/capture-profile-picker.png)
+
+This is an offscreen render of the application's capture picker at its default UI size, not a native desktop capture.
+
+## Launching again
+
+Launching the same preview again opens the running instance's Preferences. The isolated launcher forwards the existing settings command without rewriting settings or logs. If a different Greenshot is running, save your work and normally Exit it before starting this package.
+
 Enable the quality prompt under **Preferences > Output**. When saving PNG or JPEG, choose Preserve, Web 72, Print 300, or Custom DPI. The summary shows pixels, selected resolution, nominal print dimensions, and compression. Resolution metadata alone does not resize pixels.
 
 ![PNG quality dialog with Print 300 DPI and the live export summary](whitepaper/images/export-resolution-summary.png)

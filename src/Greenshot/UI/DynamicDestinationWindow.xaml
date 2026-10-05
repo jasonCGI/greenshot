@@ -96,7 +96,8 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="8,2"/>
             <Setter Property="Margin" Value="2"/>
-            <Setter Property="Height" Value="34"/>
+            <Setter Property="MinHeight" Value="34"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -362,11 +363,13 @@
                                                        VerticalAlignment="Center" Visibility="{Binding IconVisibility}"/>
 
                                                 <!-- Title -->
-                                                <TextBlock Grid.Column="1" Text="{Binding Title}" 
-                                                           Foreground="{Binding Path=DataContext.TextPrimaryBrush, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                           FontWeight="SemiBold" FontSize="12"
-                                                           VerticalAlignment="Center"
-                                                           TextTrimming="CharacterEllipsis"/>
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,4">
+                                                    <TextBlock Text="{Binding Title}" Foreground="{Binding TextPrimaryBrush}"
+                                                               FontWeight="SemiBold" FontSize="12" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding Subtitle}" Foreground="{Binding TextSecondaryBrush}"
+                                                               FontSize="10.5" TextWrapping="Wrap" Margin="0,3,0,0"
+                                                               Visibility="{Binding SummaryVisibility}"/>
+                                                </StackPanel>
 
                                                 <!-- Badge (e.g. Retry) -->
                                                 <Border Grid.Column="2" Background="{Binding BadgeBackgroundBrush}" 
@@ -432,7 +435,7 @@
                             <ItemsControl ItemsSource="{Binding FilteredOtherDestinationTiles}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
-                                        <UniformGrid Columns="2"/>
+                                        <UniformGrid Columns="2" VerticalAlignment="Top"/>
                                     </ItemsPanelTemplate>
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
@@ -451,11 +454,13 @@
                                                        VerticalAlignment="Center" Visibility="{Binding IconVisibility}"/>
 
                                                 <!-- Title -->
-                                                <TextBlock Grid.Column="1" Text="{Binding Title}" 
-                                                           Foreground="{Binding Path=DataContext.TextPrimaryBrush, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                           FontWeight="SemiBold" FontSize="12"
-                                                           VerticalAlignment="Center"
-                                                           TextTrimming="CharacterEllipsis"/>
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,4">
+                                                    <TextBlock Text="{Binding Title}" Foreground="{Binding TextPrimaryBrush}"
+                                                               FontWeight="SemiBold" FontSize="12" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding Subtitle}" Foreground="{Binding TextSecondaryBrush}"
+                                                               FontSize="10.5" TextWrapping="Wrap" Margin="0,3,0,0"
+                                                               Visibility="{Binding SummaryVisibility}"/>
+                                                </StackPanel>
 
                                                 <!-- Optional Badge -->
                                                 <Border Grid.Column="2" Background="{Binding BadgeBackgroundBrush}" 

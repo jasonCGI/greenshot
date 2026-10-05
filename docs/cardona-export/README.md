@@ -23,10 +23,14 @@ Run `docs/cardona-export/scripts/Build-Preview.ps1 -Test` from a PowerShell term
 
 `-NoRestore` requires a prior build with cached packages, the unchanged build helper, and plugin builds. The normal restore graph was previously blocked by a package-feed failure in the development environment; it has not been independently retested.
 
-Latest local evidence, October 4, 2026: 578 focused tests passed, zero failures, errors, timeouts, or aborts. This is not the full upstream suite. Ten copied-library PNG/JPEG comparisons additionally verified density tags, unchanged source, and equal PNG pixels. Existing upstream analyzer warnings remain. Test logs contain local environment details and are not published here.
+Latest local evidence, October 5, 2026: 583 focused tests passed, zero failures, errors, timeouts, or aborts. This is not the full upstream suite. Ten copied-library PNG/JPEG comparisons additionally verified density tags, unchanged source, and equal PNG pixels. Existing upstream analyzer warnings remain. Test logs contain local environment details and are not published here.
 
 Native mouse/keyboard, Save As, overwrite, mixed-monitor, and Photoshop placement acceptance remains pending. The illustrated controls are real WPF controls rendered offscreen, not native desktop captures. Native OS dialogs and plugin-specific legacy dialog scaling are outside the new UI-scale guarantee.
 
 Keep Preserve and UI size 100 as current defaults. Main Preferences retains upstream live bindings; Cancel is not a full rollback of valid in-memory edits. Do not run this preview beside installed Greenshot: the single-instance lock is shared. Save your work and normally exit the installed copy first.
 
 Application source is on `codex/export-dpi-presets`. The GitHub prerelease packages the lightweight preview. No upstream pull request or installer is included. See PREVIEW-README.md, ACCEPTANCE-CHECKLIST.md, and CODE-REVIEW.md.
+
+## October 5 preview update
+
+Save As exposes the current export format, DPI preset, and image pixels. Capture picker profile choices apply to one save and preselect the profile format without changing output defaults. A repeat launch of the same executable opens Preferences using the existing settings command. A different running installation retains the instance chooser or isolated-launcher guard. Native launch, Save As, cancellation, keyboard, and monitor acceptance remain pending.

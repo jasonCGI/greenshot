@@ -186,6 +186,7 @@ namespace Greenshot.Pipeline
             var choices = DestinationHelper.GetAllDestinations()
                 .Where(d => !nameof(WellKnownDestinations.Picker).Equals(d.Designation, StringComparison.OrdinalIgnoreCase) && d.IsAvailableFor(captureDetails))
                 .ToList();
+            choices.AddRange(Greenshot.Destinations.ProfileFileDestination.GetChoices(IniConfigRegistry.GetSection<ICoreConfiguration>()));
             while (true)
             {
                 var picked = await userInteraction.PickDestinationAsync(choices, captureDetails, cancellationToken).ConfigureAwait(false);

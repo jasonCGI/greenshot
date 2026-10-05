@@ -21,3 +21,7 @@ Use the isolated launcher, keep installed Greenshot closed, and record Windows s
 | Photoshop placement | Open and Place behavior recorded independently against document settings | Pending native check |
 
 For each failure, include reproduction steps, actual image dimensions/metadata where relevant, and a screenshot. Do not promote the preview to a stable release until the required native checks pass.
+
+## October 5 preview update
+
+Save As exposes the current export format, DPI preset, and image pixels. Capture picker profile choices apply to one save and preselect the profile format without changing output defaults. A repeat launch of the same executable opens Preferences using the existing settings command. A different running installation retains the instance chooser or isolated-launcher guard. Native launch, Save As, cancellation, keyboard, and monitor acceptance remain pending.

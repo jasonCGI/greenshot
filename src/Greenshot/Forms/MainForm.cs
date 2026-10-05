@@ -145,6 +145,34 @@ namespace Greenshot.Forms
 
                 if (isAlreadyRunning)
                 {
+                    // A plain repeat launch of this executable brings Preferences forward.
+                    // Other installations retain the instance chooser.
+                    using (var current = Process.GetCurrentProcess())
+                    {
+                        string currentPath = Kernel32Api.GetProcessPath(current.Id);
+                        bool sameExecutable = false;
+                        int sessionInstances = 0;
+                        foreach (var process in Process.GetProcessesByName("greenshot"))
+                        {
+                            using (process)
+                            {
+                                if (process.Id == current.Id) continue;
+                                try
+                                {
+                                    if (process.SessionId != current.SessionId) continue;
+                                    sessionInstances++;
+                                    sameExecutable |= string.Equals(currentPath, Kernel32Api.GetProcessPath(process.Id), StringComparison.OrdinalIgnoreCase);
+                                }
+                                catch (Exception ex) { Log.Debug(ex); }
+                            }
+                        }
+                        if (sameExecutable && sessionInstances == 1)
+                        {
+                            NamedPipeClient.SendMessage(IpcEnvelope.CreateCli(new[] { "greenshot:settings" }, IpcSources.Cli, Environment.CurrentDirectory));
+                            FreeMutex();
+                            return;
+                        }
+                    }
                     var instances = new List<RunningInstanceItem>();
                     bool matchedThisProcess = false;
                     int index = 1;

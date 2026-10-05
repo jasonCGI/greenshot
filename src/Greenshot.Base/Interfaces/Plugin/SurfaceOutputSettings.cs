@@ -44,6 +44,7 @@ namespace Greenshot.Base.Interfaces.Plugin
             WebpLossless = CoreConfig.OutputFileWebpLossless;
             WebpQuality = CoreConfig.OutputFileWebpQuality;
             ReduceColors = CoreConfig.OutputFileReduceColors;
+            AutoReduceColors = CoreConfig.OutputFileAutoReduceColors;
         }
 
         public SurfaceOutputSettings(string format) : this()
@@ -94,6 +95,8 @@ namespace Greenshot.Base.Interfaces.Plugin
         public int WebpQuality { get; set; }
 
         public bool SaveBackgroundOnly { get; set; }
+
+        public bool AutoReduceColors { get; set; }
 
         public List<IEffect> Effects { get; } = new List<IEffect>();
 

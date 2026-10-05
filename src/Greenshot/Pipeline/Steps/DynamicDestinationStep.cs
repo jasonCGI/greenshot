@@ -26,6 +26,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using Dapplo.Ini;
 using Greenshot.Base;
 using Greenshot.Base.Core;
 using Greenshot.Base.Interfaces;
@@ -111,6 +112,7 @@ namespace Greenshot.Pipeline.Steps
             else
             {
                 targetDests = allDests;
+                targetDests.AddRange(ProfileFileDestination.GetChoices(IniConfigRegistry.GetSection<ICoreConfiguration>()));
             }
 
             // Resolve other recipes if forwarding is enabled

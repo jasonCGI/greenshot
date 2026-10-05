@@ -48,6 +48,7 @@ namespace Greenshot.Destinations
             var destinations = DestinationHelper.GetAllDestinations()
                 .Where(destination => !Designation.Equals(destination.Designation) && destination.IsAvailableFor(request.Metadata))
                 .ToList();
+            destinations.AddRange(ProfileFileDestination.GetChoices(CoreConfiguration));
 
             while (true)
             {

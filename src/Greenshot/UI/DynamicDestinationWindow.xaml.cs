@@ -54,6 +54,8 @@ namespace Greenshot.UI
         public IDestination Destination { get; set; }
         public string Title { get; set; }
         public string Subtitle { get; set; }
+        public Visibility SummaryVisibility => Destination?.Designation == nameof(WellKnownDestinations.FileDialog)
+            || Destination is Greenshot.Destinations.ProfileFileDestination ? Visibility.Visible : Visibility.Collapsed;
         private ImageSource _iconSource;
 
         public ImageSource IconSource
@@ -250,6 +252,12 @@ namespace Greenshot.UI
                     }
 
                     var (destTitle, destSubtitle) = FormatDestinationNames(dest);
+                    if (dest.Designation == nameof(WellKnownDestinations.FileDialog) || dest is Greenshot.Destinations.ProfileFileDestination)
+                    {
+                        var settings = dest is Greenshot.Destinations.ProfileFileDestination profileDestination
+                            ? profileDestination.Profile.CreateOutputSettings() : new Greenshot.Base.Interfaces.Plugin.SurfaceOutputSettings();
+                        destSubtitle = ExportMenuSummary.Describe(settings, previewImage?.Size ?? System.Drawing.Size.Empty);
+                    }
 
                     var tile = new DestinationTileViewModel
                     {

@@ -15,7 +15,7 @@ Review scope: export profile model/storage, Output settings bindings and handler
 
 ## Verification
 
-Final result: 578 tests passed, zero failures. The policy fixture runs without parallel tests and unregisters its temporary configuration; an earlier test-isolation failure was corrected before the final run.
+Final result: 583 tests passed, zero failures. The policy fixture runs without parallel tests and unregisters its temporary configuration; an earlier test-isolation failure was corrected before the final run.
 
 The selected build and regression suite is executed with `Build-Preview.ps1 -Test -NoRestore`. Results include profile round-trip through the INI writer/parser, policy refusal without partial updates, invalid and malicious storage, profile application, custom save/reopen/delete, corruption preservation, and Output rendering at 100%, 125%, 150%, and 200%. The release record gives the final test count and exact source commit.
 
@@ -24,3 +24,7 @@ The selected build and regression suite is executed with `Build-Preview.ps1 -Tes
 No unresolved defect was identified in the reviewed changes after fixes and focused checks. Native keyboard, Save As/overwrite, real configuration save at process exit, Windows scaling combinations, and mixed-monitor capture are still unverified. Existing upstream Preferences changes settings live, so Cancel is not a full rollback; the guide makes that explicit. At 200% on smaller screens, the existing wrapper permits scrolling rather than shrinking controls. New profile/help copy is English; complete translation coverage is deferred. Existing build analyzer warnings and the unretested full restore graph remain.
 
 The release is unsigned and explicitly marked prerelease. The installed application is unchanged.
+
+## October 5 preview update
+
+Save As exposes the current export format, DPI preset, and image pixels. Capture picker profile choices apply to one save and preselect the profile format without changing output defaults. A repeat launch of the same executable opens Preferences using the existing settings command. A different running installation retains the instance chooser or isolated-launcher guard. Native launch, Save As, cancellation, keyboard, and monitor acceptance remain pending.

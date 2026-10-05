@@ -27,3 +27,7 @@ Preferences uses the upstream live settings bindings. Cancel is not a complete r
 See CODE-REVIEW.md and ACCEPTANCE-CHECKLIST.md. Focused automated tests cover the encoder and UI models; offscreen WPF rendering does not establish actual mouse/keyboard or mixed-monitor behavior. Full restore previously failed when the package feed was unavailable. This preview reused cached packages and build prerequisites, with existing analyzer warnings. Native Save As, overwrite, monitor capture, keyboard navigation, and Photoshop placement remain pending.
 
 The package manifest identifies the exact source commit and each initial file hash. Source and build scripts are in [jasonCGI/greenshot](https://github.com/jasonCGI/greenshot). GitHub supplies source archives for the release tag. Upstream copyright and GPL notices are retained in LICENSE. Third-party attribution and license files are included. No official Greenshot endorsement is implied.
+
+## October 5 preview update
+
+Save As exposes the current export format, DPI preset, and image pixels. Capture picker profile choices apply to one save and preselect the profile format without changing output defaults. A repeat launch of the same executable opens Preferences using the existing settings command. A different running installation retains the instance chooser or isolated-launcher guard. Native launch, Save As, cancellation, keyboard, and monitor acceptance remain pending.

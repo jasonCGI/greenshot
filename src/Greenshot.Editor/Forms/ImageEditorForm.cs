@@ -740,6 +740,8 @@ if (!IsDisposed && !Disposing && IsHandleCreated)
                 }
 
                 ToolStripMenuItem item = DestinationMenuBuilder.CreateMenuItem(destination, _surface.CaptureDetails, ExportTo);
+                if (destination.Designation == nameof(WellKnownDestinations.FileDialog))
+                    item.Text += " · " + ExportMenuSummary.Describe(new SurfaceOutputSettings(), _surface.Image.Size);
                 item.ShortcutKeys = DestinationMenuBuilder.ToKeys(destination.Descriptor.Shortcut);
                 fileStripMenuItem.DropDownItems.Add(item);
             }

@@ -12,6 +12,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using Dapplo.Ini;
 using Greenshot.Base.Core.Enums;
+using Greenshot.Base.Interfaces.Plugin;
 
 namespace Greenshot.Base.Core
 {
@@ -79,6 +80,17 @@ namespace Greenshot.Base.Core
             config.OutputFileReduceColors = ReduceColors;
             config.OutputFileAutoReduceColors = AutoReduceColors;
             config.OutputFilePromptQuality = PromptQuality;
+        }
+
+        public SurfaceOutputSettings CreateOutputSettings()
+        {
+            Validate();
+            return new SurfaceOutputSettings(Format)
+            {
+                ExportDpiPreset = DpiPreset, CustomDpi = CustomDpi,
+                JPGQuality = JpegQuality, WebpLossless = WebpLossless, WebpQuality = WebpQuality,
+                ReduceColors = ReduceColors, AutoReduceColors = AutoReduceColors
+            };
         }
 
         public static string Serialize(List<ExportProfile> profiles)
