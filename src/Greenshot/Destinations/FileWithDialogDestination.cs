@@ -34,15 +34,17 @@ namespace Greenshot.Destinations
     /// </summary>
     public class FileWithDialogDestination : DestinationBase
     {
-        public override string Designation => nameof(WellKnownDestinations.FileDialog);
+        private readonly bool _review;
+        public FileWithDialogDestination(bool review = false) { _review = review; }
+        public override string Designation => _review ? "FileDialogReview" : nameof(WellKnownDestinations.FileDialog);
 
         public override DestinationDescriptor Descriptor => new DestinationDescriptor(
-            Texts.Settings.DestinationFileas, 0, DestinationIcons.Resource("Save.Image"), "Ctrl+Shift+S");
+            _review ? "Review and Save As..." : Texts.Settings.DestinationFileas, 0, DestinationIcons.Resource("Save.Image"), _review ? null : "Ctrl+Shift+S");
 
         public override async Task<ExportResult> ExportAsync(ExportRequest request, CancellationToken cancellationToken)
         {
             // Bug #2918756 don't overwrite path if SaveWithDialog returns null!
-            var savedTo = await FileDestination.SaveWithDialogAsync(request, CoreConfiguration.OutputFileCopyPathToClipboard, cancellationToken).ConfigureAwait(false);
+            var savedTo = await FileDestination.SaveWithDialogAsync(request, CoreConfiguration.OutputFileCopyPathToClipboard, cancellationToken, forceReview: _review).ConfigureAwait(false);
             return savedTo == null ? ExportResult.Declined : FileDestination.Saved(request.Metadata, savedTo);
         }
     }

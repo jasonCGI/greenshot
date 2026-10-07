@@ -59,7 +59,7 @@ namespace Greenshot.Base.Core
             bool webp = WellKnownFileFormats.IsEqualFormat(WellKnownFileFormats.Webp, settings.Format);
             string compression = webp ? (settings.WebpLossless ? "WebP lossless compression" : $"WebP lossy, quality {settings.WebpQuality}")
                 : jpeg ? $"JPEG lossy, quality {settings.JPGQuality}" : png ? "PNG lossless compression" : settings.Format;
-            if (png && settings.ReduceColors && !settings.DisableReduceColors) compression += "; palette reduction may change colors";
+            if (png && (settings.ReduceColors || settings.AutoReduceColors) && !settings.DisableReduceColors) compression += "; palette reduction may change colors";
             if (!png && !jpeg) return $"{pixels}\n{compression}\nDPI presets do not apply to this format.";
             float? dpi;
             try { dpi = ExportDpiSettings.GetResolution(settings); }

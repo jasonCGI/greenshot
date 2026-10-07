@@ -268,6 +268,9 @@ namespace Greenshot.Base.Wpf
 
             var root = new StackPanel { Margin = new Thickness(20, 16, 20, 16) };
             root.Children.Add(ThemedControls.CreateHeader(this, title));
+            if (!string.IsNullOrEmpty(settings.PreviewFileName))
+                root.Children.Add(new TextBlock { Name = "ExportTargetText", Text = "Save to: " + settings.PreviewFileName,
+                    TextWrapping = TextWrapping.Wrap, Foreground = WpfThemeHelper.TextPrimary, Margin = new Thickness(0, 0, 0, 8) });
             root.Children.Add(_reduceColors);
             root.Children.Add(dpiLabel);
             root.Children.Add(_dpiPreset);
@@ -323,9 +326,10 @@ namespace Greenshot.Base.Wpf
                 CustomDpi = ExportDpiSettings.TryParseCustomDpi(_customDpi.Text, out int custom) ? custom : 0,
                 JPGQuality = (int)_qualitySlider.Value, WebpLossless = Equals(_webpMode.SelectedValue, true),
                 WebpQuality = (int)_webpQualitySlider.Value, ReduceColors = _reduceColors.IsChecked == true,
-                DisableReduceColors = _settings.DisableReduceColors
+                DisableReduceColors = _settings.DisableReduceColors,
+                AutoReduceColors = _settings.AutoReduceColors
             };
-            _summary.Text = ExportSummary.Describe(preview);
+            _summary.Text = "Format: " + _settings.Format.ToUpperInvariant() + "\n" + ExportSummary.Describe(preview);
         }
 
         private bool Apply()

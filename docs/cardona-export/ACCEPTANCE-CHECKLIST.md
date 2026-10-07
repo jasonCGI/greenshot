@@ -25,3 +25,15 @@ For each failure, include reproduction steps, actual image dimensions/metadata w
 ## October 5 preview update
 
 Save As exposes the current export format, DPI preset, and image pixels. Capture picker profile choices apply to one save and preselect the profile format without changing output defaults. A repeat launch of the same executable opens Preferences using the existing settings command. A different running installation retains the instance chooser or isolated-launcher guard. Native launch, Save As, cancellation, keyboard, and monitor acceptance remain pending.
+
+## October 7 sprints
+
+See [the sprint record](SPRINTS-2026-10-07.md) and [illustrated guide](SETTINGS-GUIDE.md). Added protected profile editing/rename/duplication and transactional XML import/export, final-format Review and Save As, stable shared-preference launcher, and local diagnostics. Fixed export-cache separation for automatic palette settings. Native acceptance remains open.
+
+- [ ] Cancel a profile edit and verify both saved profile and output defaults are unchanged.
+- [ ] Rename/duplicate a profile; import a conflicting file and verify the entire import is rejected.
+- [ ] Choose Review and Save As with the default prompt off; change JPEG to PNG and inspect final DPI/pixels.
+- [ ] Cancel filename/review/overwrite; verify an existing file is unchanged.
+- [ ] Normally Exit an older preview, adopt the stable launcher, and verify UI size and custom profiles migrate.
+- [ ] Launch again and verify Preferences activates while unsaved editor work remains.
+- [ ] Check keyboard order, 100/125/150/200 percent UI size, and mixed-monitor capture.

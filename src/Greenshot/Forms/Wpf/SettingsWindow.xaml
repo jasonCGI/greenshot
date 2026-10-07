@@ -677,12 +677,26 @@
                                     <Button Grid.Column="1" Content="Apply" Click="ApplyExportProfile_Click"/>
                                     <Button Grid.Column="2" Content="Delete custom" Click="DeleteExportProfile_Click"/>
                                 </Grid>
+                                <TextBlock Text="{Binding ExportProfileSummary}" TextWrapping="Wrap" Margin="6,4"/>
+                                <Expander x:Name="ManageExportProfiles" Header="Manage profiles" Margin="6,4">
+                                    <StackPanel>
+                                <WrapPanel Margin="6,2">
+                                    <Button Content="Edit custom" Click="EditExportProfile_Click"/>
+                                    <Button Content="Import profiles" Click="ImportExportProfiles_Click"/>
+                                    <Button Content="Export custom profiles" Click="ExportExportProfiles_Click"/>
+                                </WrapPanel>
                                 <Label Content="New profile name" Target="{Binding ElementName=ExportProfileNameInput}" Margin="6,2,0,0" Padding="0"/>
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                     <TextBox x:Name="ExportProfileNameInput" Text="{Binding ExportProfileName, UpdateSourceTrigger=PropertyChanged}" MaxLength="64" AutomationProperties.Name="New profile name" ToolTip="Enter a new profile name"/>
                                     <Button Grid.Column="1" Content="Save current as" Click="SaveExportProfile_Click"/>
                                 </Grid>
+                                <WrapPanel Margin="6,2">
+                                    <Button Content="Rename selected" Click="RenameExportProfile_Click"/>
+                                    <Button Content="Duplicate selected" Click="DuplicateExportProfile_Click"/>
+                                </WrapPanel>
+                                    </StackPanel>
+                                </Expander>
                                 <TextBlock Text="{Binding ExportProfileStatus}" TextWrapping="Wrap" Margin="6,4" AutomationProperties.LiveSetting="Polite"/>
                             </StackPanel>
                         </GroupBox>

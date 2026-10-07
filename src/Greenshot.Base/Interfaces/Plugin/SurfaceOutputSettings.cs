@@ -83,6 +83,7 @@ namespace Greenshot.Base.Interfaces.Plugin
         public System.Drawing.Size PreviewSize { get; set; }
         public float PreviewDpiX { get; set; }
         public float PreviewDpiY { get; set; }
+        public string PreviewFileName { get; set; }
 
         public ExportDpiPreset ExportDpiPreset { get; set; }
 

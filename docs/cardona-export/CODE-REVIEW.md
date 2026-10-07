@@ -15,7 +15,7 @@ Review scope: export profile model/storage, Output settings bindings and handler
 
 ## Verification
 
-Final result: 583 tests passed, zero failures. The policy fixture runs without parallel tests and unregisters its temporary configuration; an earlier test-isolation failure was corrected before the final run.
+Final result: 595 tests passed, zero failures. The policy fixture runs without parallel tests and unregisters its temporary configuration; an earlier test-isolation failure was corrected before the final run.
 
 The selected build and regression suite is executed with `Build-Preview.ps1 -Test -NoRestore`. Results include profile round-trip through the INI writer/parser, policy refusal without partial updates, invalid and malicious storage, profile application, custom save/reopen/delete, corruption preservation, and Output rendering at 100%, 125%, 150%, and 200%. The release record gives the final test count and exact source commit.
 
@@ -28,3 +28,7 @@ The release is unsigned and explicitly marked prerelease. The installed applicat
 ## October 5 preview update
 
 Save As exposes the current export format, DPI preset, and image pixels. Capture picker profile choices apply to one save and preselect the profile format without changing output defaults. A repeat launch of the same executable opens Preferences using the existing settings command. A different running installation retains the instance chooser or isolated-launcher guard. Native launch, Save As, cancellation, keyboard, and monitor acceptance remain pending.
+
+## October 7 sprints
+
+See [the sprint record](SPRINTS-2026-10-07.md) and [illustrated guide](SETTINGS-GUIDE.md). Added protected profile editing/rename/duplication and transactional XML import/export, final-format Review and Save As, stable shared-preference launcher, and local diagnostics. Fixed export-cache separation for automatic palette settings. Native acceptance remains open.

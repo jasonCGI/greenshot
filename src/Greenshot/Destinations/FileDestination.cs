@@ -178,7 +178,7 @@ namespace Greenshot.Destinations
         /// <summary>
         /// Ask for a file and save the capture to it, null when the user declined or the file couldn't be written.
         /// </summary>
-        internal static async Task<string> SaveWithDialogAsync(ExportRequest request, bool copyPathToClipboard, CancellationToken cancellationToken, ExportProfile profile = null)
+        internal static async Task<string> SaveWithDialogAsync(ExportRequest request, bool copyPathToClipboard, CancellationToken cancellationToken, ExportProfile profile = null, bool forceReview = false)
         {
             string fileNameWithExtension = await request.Ui.PickSaveFileAsync(new SaveFileRequest(request.Metadata, preferredFormat: profile?.Format), cancellationToken).ConfigureAwait(false);
             if (fileNameWithExtension == null)
@@ -188,7 +188,8 @@ namespace Greenshot.Destinations
 
             var outputSettings = profile?.CreateOutputSettings() ?? new SurfaceOutputSettings();
             outputSettings.Format = ImageIO.FormatForFilename(fileNameWithExtension);
-            if (profile?.PromptQuality ?? CoreConfig.OutputFilePromptQuality)
+            outputSettings.PreviewFileName = fileNameWithExtension;
+            if (forceReview || (profile?.PromptQuality ?? CoreConfig.OutputFilePromptQuality))
             {
                 await ExportSummary.PopulateAsync(request.Source, outputSettings, cancellationToken).ConfigureAwait(false);
                 outputSettings = await request.Ui.PromptOutputSettingsAsync(outputSettings, cancellationToken).ConfigureAwait(false);

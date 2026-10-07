@@ -118,6 +118,39 @@ namespace Greenshot.Forms.Wpf
         private void ApplyExportProfile_Click(object sender, RoutedEventArgs e) => _viewModel.ApplyExportProfile();
         private void SaveExportProfile_Click(object sender, RoutedEventArgs e) => _viewModel.SaveExportProfile();
         private void DeleteExportProfile_Click(object sender, RoutedEventArgs e) => _viewModel.DeleteExportProfile();
+        private void RenameExportProfile_Click(object sender, RoutedEventArgs e) => _viewModel.RenameExportProfile();
+        private void DuplicateExportProfile_Click(object sender, RoutedEventArgs e) => _viewModel.DuplicateExportProfile();
+        private void EditExportProfile_Click(object sender, RoutedEventArgs e)
+        {
+            var selected = _viewModel.SelectedExportProfile;
+            if (selected == null || selected.BuiltIn)
+            {
+                MessageBox.Show(this, "Select a custom profile. Duplicate a built-in first.", "Edit export profile");
+                return;
+            }
+            var editor = new ExportProfileEditorWindow(selected) { Owner = this };
+            if (editor.ShowDialog() == true) _viewModel.UpdateExportProfile(editor.Result);
+        }
+        private void ImportExportProfiles_Click(object sender, RoutedEventArgs e)
+        {
+            var picker = new Microsoft.Win32.OpenFileDialog { Filter = "Greenshot profiles (*.xml)|*.xml", CheckFileExists = true };
+            if (picker.ShowDialog(this) != true) return;
+            try
+            {
+                if (new System.IO.FileInfo(picker.FileName).Length > 262144) throw new ArgumentException("Profile file is too large.");
+                _viewModel.ImportExportProfiles(System.IO.File.ReadAllText(picker.FileName));
+            }
+            catch (Exception ex) when (ex is System.IO.IOException || ex is UnauthorizedAccessException || ex is ArgumentException)
+            { MessageBox.Show(this, ex.Message, "Import profiles"); }
+        }
+        private void ExportExportProfiles_Click(object sender, RoutedEventArgs e)
+        {
+            var picker = new Microsoft.Win32.SaveFileDialog { Filter = "Greenshot profiles (*.xml)|*.xml", FileName = "Greenshot-export-profiles.xml", OverwritePrompt = true };
+            if (picker.ShowDialog(this) != true) return;
+            try { System.IO.File.WriteAllText(picker.FileName, _viewModel.ExportProfileDocument(), System.Text.Encoding.Unicode); }
+            catch (Exception ex) when (ex is System.IO.IOException || ex is UnauthorizedAccessException || ex is ArgumentException)
+            { MessageBox.Show(this, ex.Message, "Export profiles"); }
+        }
 
         public void SelectTab(string tabName)
         {

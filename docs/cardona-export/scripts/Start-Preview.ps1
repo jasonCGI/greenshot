@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param()
+param([string]$StateDirectory)
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
 $executable = [IO.Path]::GetFullPath((Join-Path $root 'app\Greenshot.exe'))
@@ -15,8 +15,9 @@ if ($running.Count) {
 foreach ($fixed in @((Join-Path ([Environment]::GetFolderPath('ApplicationData')) 'Greenshot\greenshot-fixed.ini'), (Join-Path $root 'app\greenshot-fixed.ini'))) {
     if (Test-Path -LiteralPath $fixed) { throw 'A fixed Greenshot policy exists. Resolve its scope before using this isolated preview.' }
 }
-$settings = Join-Path $root 'settings'
-$logs = Join-Path $root 'logs'
+$state = if ($StateDirectory) { [IO.Path]::GetFullPath($StateDirectory) } else { $root }
+$settings = Join-Path $state 'settings'
+$logs = Join-Path $state 'logs'
 New-Item -ItemType Directory -Path $settings,$logs -Force | Out-Null
 $logPath = Join-Path $logs 'Greenshot-preview.log'
 $escapedLogPath = [Security.SecurityElement]::Escape($logPath)

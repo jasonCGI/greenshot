@@ -21,6 +21,16 @@ namespace Greenshot.Tests.Core
     public class ExportProfileTests
     {
         [Fact]
+        public void PortableProfileFileRoundTripAndDtdRejection()
+        {
+            var profile = ExportProfile.Defaults()[2].Copy("My lossless profile");
+            string document = ExportProfile.ExportDocument(new System.Collections.Generic.List<ExportProfile> { profile });
+            var restored = Assert.Single(ExportProfile.ImportDocument(document));
+            Assert.Equal(profile.Name, restored.Name); Assert.True(restored.WebpLossless); Assert.False(restored.BuiltIn);
+            Assert.ThrowsAny<Exception>(() => ExportProfile.ImportDocument("<!DOCTYPE x [<!ENTITY e SYSTEM 'file:///missing'>]><x>&e;</x>"));
+            Assert.Throws<ArgumentException>(() => ExportProfile.ImportDocument(new string('x', 65537)));
+        }
+        [Fact]
         public void TemporaryProfileSettingsAreIndependentAndLeaveDefaultsAlone()
         {
             TestEnvironment.EnsureInitialized();

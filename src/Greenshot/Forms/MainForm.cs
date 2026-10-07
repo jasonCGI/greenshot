@@ -608,6 +608,7 @@ namespace Greenshot.Forms
             {
                 new FileDestination(),
                 new FileWithDialogDestination(),
+                new FileWithDialogDestination(review: true),
                 new ClipboardDestination(),
                 new PrinterDestination(),
                 new EmailDestination(),

@@ -63,6 +63,39 @@ namespace Greenshot.Base.Core
                 throw new ArgumentException("Profile quality must be from 0 to 100.");
         }
 
+        public ExportProfile Copy(string name)
+        {
+            var result = (ExportProfile)MemberwiseClone();
+            result.Name = name?.Trim();
+            result.BuiltIn = false;
+            result.Validate();
+            return result;
+        }
+
+        public string Summary => ExportMenuSummary.Describe(CreateOutputSettings(), System.Drawing.Size.Empty) +
+            (Format == "jpg" ? $" · quality {JpegQuality}" : Format == "webp" ? WebpLossless ? " · lossless" : $" · quality {WebpQuality}" : "") +
+            (PromptQuality ? " · review before save" : "");
+
+        public static string ExportDocument(List<ExportProfile> profiles)
+        {
+            ValidateList(profiles);
+            using var writer = new StringWriter();
+            new XmlSerializer(typeof(List<ExportProfile>)).Serialize(writer, profiles);
+            string document = writer.ToString();
+            if (document.Length > 65536) throw new ArgumentException("Profile file is too large.");
+            return document;
+        }
+
+        public static List<ExportProfile> ImportDocument(string document)
+        {
+            if (document == null || document.Length > 65536) throw new ArgumentException("Profile file is too large.");
+            using var reader = XmlReader.Create(new StringReader(document), new XmlReaderSettings
+                { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null, MaxCharactersInDocument = 65536 });
+            var result = (List<ExportProfile>)new XmlSerializer(typeof(List<ExportProfile>)).Deserialize(reader);
+            ValidateList(result);
+            return result;
+        }
+
         public void Apply(ICoreConfiguration config)
         {
             Validate();

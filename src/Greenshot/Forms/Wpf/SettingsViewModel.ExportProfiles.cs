@@ -17,7 +17,13 @@ namespace Greenshot.Forms.Wpf
     public partial class SettingsViewModel
     {
         public ObservableCollection<ExportProfile> ExportProfiles { get; } = new ObservableCollection<ExportProfile>();
-        public ExportProfile SelectedExportProfile { get; set; }
+        private ExportProfile _selectedExportProfile;
+        public ExportProfile SelectedExportProfile
+        {
+            get => _selectedExportProfile;
+            set { _selectedExportProfile = value; OnPropertyChanged(); OnPropertyChanged(nameof(ExportProfileSummary)); }
+        }
+        public string ExportProfileSummary => SelectedExportProfile?.Summary ?? "Select a profile to see its settings.";
         public string ExportProfileName { get; set; }
         private string _exportProfileStatus;
         private bool _profileStorageValid = true;
@@ -84,6 +90,66 @@ namespace Greenshot.Forms.Wpf
             });
         }
 
+        public void UpdateExportProfile(ExportProfile replacement)
+        {
+            RunProfileAction(() =>
+            {
+                EnsureProfileStorageWritable();
+                var selected = SelectedExportProfile;
+                if (replacement == null) throw new ArgumentException("An edited profile is required.");
+                if (selected == null || selected.BuiltIn || !ExportProfiles.Contains(selected))
+                    throw new ArgumentException("Select a custom profile to edit. Duplicate a built-in first.");
+                if (ExportProfiles.Any(p => p != selected && string.Equals(p.Name, replacement.Name, StringComparison.OrdinalIgnoreCase)))
+                    throw new ArgumentException("That profile name already exists.");
+                var copy = replacement.Copy(replacement.Name);
+                CoreConfiguration.OutputExportProfiles = ExportProfile.Serialize(ExportProfiles.Where(p => !p.BuiltIn)
+                    .Select(p => p == selected ? copy : p).ToList());
+                ExportProfiles[ExportProfiles.IndexOf(selected)] = copy;
+                SelectedExportProfile = copy;
+                ExportProfileStatus = "Updated " + copy.Name + ". Output defaults are unchanged.";
+            });
+        }
+
+        public void RenameExportProfile()
+        {
+            RunProfileAction(() =>
+            {
+                if (SelectedExportProfile == null) throw new ArgumentException("Select a custom profile to rename.");
+                UpdateExportProfile(SelectedExportProfile.Copy(ExportProfileName));
+            });
+        }
+
+        public void DuplicateExportProfile()
+        {
+            RunProfileAction(() =>
+            {
+                EnsureProfileStorageWritable();
+                if (SelectedExportProfile == null) throw new ArgumentException("Select a profile to duplicate.");
+                var copy = SelectedExportProfile.Copy(ExportProfileName);
+                var saved = ExportProfiles.Where(p => !p.BuiltIn).ToList();
+                saved.Add(copy);
+                CoreConfiguration.OutputExportProfiles = ExportProfile.Serialize(saved);
+                ExportProfiles.Add(copy); SelectedExportProfile = copy;
+                ExportProfileStatus = "Duplicated " + copy.Name + ". Output defaults are unchanged.";
+            });
+        }
+
+        public string ExportProfileDocument() => ExportProfile.ExportDocument(ExportProfiles.Where(p => !p.BuiltIn).ToList());
+
+        public void ImportExportProfiles(string document)
+        {
+            RunProfileAction(() =>
+            {
+                EnsureProfileStorageWritable();
+                var imported = ExportProfile.ImportDocument(document);
+                var saved = ExportProfiles.Where(p => !p.BuiltIn).Concat(imported).ToList();
+                // Validate the complete merge before changing either storage or the list.
+                CoreConfiguration.OutputExportProfiles = ExportProfile.Serialize(saved);
+                foreach (var profile in imported) ExportProfiles.Add(profile);
+                ExportProfileStatus = $"Imported {imported.Count} custom profiles. Output defaults are unchanged.";
+            });
+        }
+
         private void EnsureProfileStorageWritable()
         {
             if (!_profileStorageValid) throw new InvalidOperationException("Repair the saved profile configuration before saving or deleting profiles.");
@@ -94,7 +160,7 @@ namespace Greenshot.Forms.Wpf
         private void RunProfileAction(Action action)
         {
             try { action(); }
-            catch (Exception exception) when (exception is ArgumentException || exception is InvalidOperationException)
+            catch (Exception exception) when (exception is ArgumentException || exception is InvalidOperationException || exception is System.Xml.XmlException)
             { ExportProfileStatus = exception.Message; }
         }
     }

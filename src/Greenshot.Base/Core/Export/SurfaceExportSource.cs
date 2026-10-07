@@ -231,7 +231,7 @@ namespace Greenshot.Base.Core.Export
             bool isWebp = WebpExportSettings.IsWebp(settings.Format);
             string webpEncoding = isWebp ? $"{settings.WebpLossless}|{(settings.WebpLossless ? 0 : settings.WebpQuality)}" : string.Empty;
             int jpegQuality = isWebp ? 0 : settings.JPGQuality;
-            return $"{settings.Format}|{jpegQuality}|{settings.ReduceColors}|{settings.DisableReduceColors}|{settings.SaveBackgroundOnly}|{settings.ExportDpiPreset}|{customDpi}|{webpEncoding}";
+            return $"{settings.Format}|{jpegQuality}|{settings.ReduceColors}|{settings.AutoReduceColors}|{settings.DisableReduceColors}|{settings.SaveBackgroundOnly}|{settings.ExportDpiPreset}|{customDpi}|{webpEncoding}";
         }
 
         private void ThrowIfDisposed()

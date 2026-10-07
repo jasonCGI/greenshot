@@ -55,6 +55,7 @@ namespace Greenshot.UI
         public string Title { get; set; }
         public string Subtitle { get; set; }
         public Visibility SummaryVisibility => Destination?.Designation == nameof(WellKnownDestinations.FileDialog)
+            || Destination?.Designation == "FileDialogReview"
             || Destination is Greenshot.Destinations.ProfileFileDestination ? Visibility.Visible : Visibility.Collapsed;
         private ImageSource _iconSource;
 
@@ -252,7 +253,7 @@ namespace Greenshot.UI
                     }
 
                     var (destTitle, destSubtitle) = FormatDestinationNames(dest);
-                    if (dest.Designation == nameof(WellKnownDestinations.FileDialog) || dest is Greenshot.Destinations.ProfileFileDestination)
+                    if (dest.Designation == nameof(WellKnownDestinations.FileDialog) || dest.Designation == "FileDialogReview" || dest is Greenshot.Destinations.ProfileFileDestination)
                     {
                         var settings = dest is Greenshot.Destinations.ProfileFileDestination profileDestination
                             ? profileDestination.Profile.CreateOutputSettings() : new Greenshot.Base.Interfaces.Plugin.SurfaceOutputSettings();
@@ -336,6 +337,7 @@ namespace Greenshot.UI
             return string.Equals(des, EditorDestination.DESIGNATION, StringComparison.OrdinalIgnoreCase) ||
                    string.Equals(des, nameof(WellKnownDestinations.Clipboard), StringComparison.OrdinalIgnoreCase) ||
                    string.Equals(des, nameof(WellKnownDestinations.FileDialog), StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(des, "FileDialogReview", StringComparison.OrdinalIgnoreCase) ||
                    string.Equals(des, nameof(WellKnownDestinations.FileNoDialog), StringComparison.OrdinalIgnoreCase) ||
                    string.Equals(des, nameof(WellKnownDestinations.Printer), StringComparison.OrdinalIgnoreCase) ||
                    des.IndexOf("ocr", StringComparison.OrdinalIgnoreCase) >= 0 ||

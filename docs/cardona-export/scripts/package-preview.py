@@ -46,7 +46,9 @@ for name in ['Greenshot.Base.dll', 'Greenshot.Editor.dll']:
         raise RuntimeError('Packaged library differs from the tested library: ' + name)
 docs = repo / 'docs/cardona-export'
 shutil.copy2(docs / 'scripts/Start-Preview.ps1', stage / 'Start-Preview.ps1')
-for name in ['PREVIEW-README.md', 'ACCEPTANCE-CHECKLIST.md', 'CODE-REVIEW.md']:
+for name in ['Install-Preview.ps1', 'Start-Greenshot.ps1', 'Get-PreviewDiagnostics.ps1', 'Test-PreviewLauncher.ps1']:
+    shutil.copy2(docs / 'scripts' / name, stage / name)
+for name in ['PREVIEW-README.md', 'ACCEPTANCE-CHECKLIST.md', 'CODE-REVIEW.md', 'SPRINTS-2026-10-07.md']:
     shutil.copy2(docs / name, stage / name)
 shutil.copy2(repo / 'LICENSE', stage / 'LICENSE')
 shutil.copy2(docs / 'SETTINGS-GUIDE.md', stage / 'SETTINGS-GUIDE.md')

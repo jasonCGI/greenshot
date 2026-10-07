@@ -25,6 +25,31 @@ namespace Greenshot.Tests.Forms
         public ExportProfileUiTests() { TestEnvironment.EnsureInitialized(); }
 
         [Fact]
+        public void EditRenameDuplicateAndImportAreTransactionalAndKeepDefaults()
+        {
+            var model = new SettingsViewModel(); var config = model.CoreConfiguration;
+            string stored = config.OutputExportProfiles;
+            string format = config.OutputFileFormat; var dpi = config.OutputFileDpiPreset;
+            try
+            {
+                config.OutputExportProfiles = ""; model = new SettingsViewModel { ExportProfileName = "My print" };
+                model.SelectedExportProfile = model.ExportProfiles.Single(p => p.Name == "Print JPEG");
+                model.DuplicateExportProfile(); Assert.Equal(4, model.ExportProfiles.Count);
+                var edited = model.SelectedExportProfile.Copy("My print"); edited.JpegQuality = 42;
+                model.UpdateExportProfile(edited); Assert.Equal(42, model.SelectedExportProfile.JpegQuality);
+                Assert.Contains("quality 42", model.ExportProfileSummary);
+                model.ExportProfileName = "Renamed print"; model.RenameExportProfile();
+                Assert.Equal("Renamed print", model.SelectedExportProfile.Name);
+                string document = model.ExportProfileDocument(); string before = config.OutputExportProfiles;
+                model.ImportExportProfiles(document); Assert.Equal(before, config.OutputExportProfiles); Assert.Equal(4, model.ExportProfiles.Count);
+                config.OutputExportProfiles = ""; model = new SettingsViewModel(); model.ImportExportProfiles(document);
+                Assert.Equal(42, model.ExportProfiles.Single(p => p.Name == "Renamed print").JpegQuality);
+                Assert.Equal(format, config.OutputFileFormat); Assert.Equal(dpi, config.OutputFileDpiPreset);
+            }
+            finally { config.OutputExportProfiles = stored; }
+        }
+
+        [Fact]
         public void CapturePickerShowsTemporaryProfilesAndSaveDensity()
         {
             Exception error = null;
@@ -36,7 +61,7 @@ namespace Greenshot.Tests.Forms
                     using var preview = new System.Drawing.Bitmap(1200, 800);
                     using (var graphics = System.Drawing.Graphics.FromImage(preview)) graphics.Clear(System.Drawing.Color.FromArgb(240, 244, 248));
                     var choices = new System.Collections.Generic.List<Greenshot.Base.Interfaces.IDestination>
-                    { new Greenshot.Destinations.FileWithDialogDestination() };
+                    { new Greenshot.Destinations.FileWithDialogDestination(), new Greenshot.Destinations.FileWithDialogDestination(review: true) };
                     choices.AddRange(Greenshot.Destinations.ProfileFileDestination.GetChoices(IniConfigRegistry.GetSection<ICoreConfiguration>()));
                     window = new Greenshot.UI.DynamicDestinationWindow("Choose output", preview, choices);
                     Assert.Contains(window.OtherDestinationTiles, t => t.Title.Contains("Web PNG"));
@@ -75,6 +100,52 @@ namespace Greenshot.Tests.Forms
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(root); i++)
                 if (HasVisibleDpi(VisualTreeHelper.GetChild(root, i))) return true;
             return false;
+        }
+
+        [Theory]
+        [InlineData(100)] [InlineData(125)] [InlineData(150)] [InlineData(200)]
+        public void ProfileEditorAndSaveReviewRenderAtEachSize(int percent)
+        {
+            Exception error = null;
+            var thread = new Thread(() =>
+            {
+                Window editor = null; Window review = null;
+                var config = IniConfigRegistry.GetSection<ICoreConfiguration>(); int original = config.UiScalePercent;
+                try
+                {
+                    config.UiScalePercent = percent;
+                    var profile = ExportProfile.Defaults()[1].Copy("My print profile");
+                    editor = new ExportProfileEditorWindow(profile);
+                    var settings = profile.CreateOutputSettings(); settings.PreviewFileName = @"C:\Screenshots\review-example.jpg";
+                    settings.PreviewSize = new System.Drawing.Size(1200, 800); settings.PreviewDpiX = 144; settings.PreviewDpiY = 144;
+                    review = new QualityWindow(settings); UiScaleManager.Attach(review, config);
+                    RenderDialog(editor, "profile-editor", percent);
+                    RenderDialog(review, "review-save", percent);
+                    Assert.Null(((ExportProfileEditorWindow)editor).Result);
+                    Assert.Equal(90, profile.JpegQuality);
+                    Assert.True(HasVisibleDpi((DependencyObject)review.Content));
+                }
+                catch (Exception ex) { error = ex; }
+                finally { editor?.Close(); review?.Close(); config.UiScalePercent = original; Dispatcher.CurrentDispatcher.InvokeShutdown(); }
+            }) { IsBackground = true };
+            thread.SetApartmentState(ApartmentState.STA); thread.Start();
+            Assert.True(thread.Join(TimeSpan.FromSeconds(30)));
+            if (error != null) throw error;
+        }
+
+        private static void RenderDialog(Window window, string name, int percent)
+        {
+            var root = (FrameworkElement)window.Content; var size = new Size(700, 1100);
+            root.Measure(size); root.Arrange(new Rect(size)); root.UpdateLayout();
+            Dispatcher.CurrentDispatcher.Invoke(new Action(() => { }), DispatcherPriority.ContextIdle);
+            string output = Environment.GetEnvironmentVariable("GREENSHOT_UI_QA_DIRECTORY");
+            if (string.IsNullOrEmpty(output)) return;
+            Directory.CreateDirectory(output);
+            var image = new RenderTargetBitmap(700, 1100, 96, 96, PixelFormats.Pbgra32);
+            var background = new DrawingVisual(); using (var draw = background.RenderOpen()) draw.DrawRectangle(window.Background ?? Brushes.White, null, new Rect(size));
+            image.Render(background); image.Render(root);
+            var encoder = new PngBitmapEncoder(); encoder.Frames.Add(BitmapFrame.Create(image));
+            using var stream = File.Create(Path.Combine(output, $"{name}-{percent}.png")); encoder.Save(stream);
         }
 
         [Fact]
@@ -141,6 +212,7 @@ namespace Greenshot.Tests.Forms
                     window = new SettingsWindow(initialTabName: "output");
                     config = ((SettingsViewModel)window.DataContext).CoreConfiguration;
                     original = config.UiScalePercent;
+                    window.ManageExportProfiles.IsExpanded = true;
                     config.UiScalePercent = percent;
                     UiScaleManager.Attach(window, config);
                     var root = (FrameworkElement)window.Content;
